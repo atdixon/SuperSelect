@@ -1,0 +1,16 @@
+resources/public/js/gen
+.idea
+*.iml
+.DS_Store
+.lein-repl-history
+.nrepl-port
+.cljs_rhino_repl
+figwheel_server.log
+node_modules
+target
+.figwheel.log
+.lein-env
+resources/release/css
+resources/release/images
+resources/unpacked/compiled/
+.chrome-profile/

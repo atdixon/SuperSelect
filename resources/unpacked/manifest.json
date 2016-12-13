@@ -1,0 +1,45 @@
+// dev-only manifest; dev files; and unsafe eval enabled for figwheel.
+{
+  "name": "Zelector",
+  "version": "0.0.1",
+  "browser_action": {
+    "default_title": "Open the Zelector Workspace",
+    //"default_popup": "popup.html",
+    "default_icon": {
+      "19": "images/icon19.png",
+      "38": "images/icon38.png"
+    }
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "web_accessible_resources": ["css/*"],
+  "content_scripts": [
+    {
+//      "matches": [
+//        "<all_urls>"
+//      ],
+      "matches": [
+        "http://*.nytimes.com/*",
+        "http://www.lipsum.com/",
+        "http://*.dictionary.com/*"],
+      "css": [
+        "css/fa/css/font-awesome-chrome-ext.min.css",
+        "css/zelector.css" ],
+      "js": [
+        "compiled/content-script/main.js"
+      ]
+    }
+  ],
+  "background": {
+    "page": "background.html",
+    "persistent": false
+  },
+  "permissions": [
+    "tabs", "storage"
+  ],
+  "manifest_version": 2
+}

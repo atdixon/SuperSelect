@@ -1,0 +1,4 @@
+$ rlwrap lein fig-dev
+$ lein content-dev
+
+

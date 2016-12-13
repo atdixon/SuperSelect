@@ -1,0 +1,50 @@
+-- s/lantana/zselect/
+-- move to zelect nses and repo
+-- keypress repeats - no good?
+-- no activate if keypress target is an input element
+-- slightly wider buffer
+-- buffer sticks across page refreshes and navigations (use synchronous local storage!)
+-- refact. glass, buffer, debug all at same level in container at z-index max.
+-- save / clear buttons/links on buffer (get rid of context menu)
+-- text/color of badge browserAction.setBadgeText/BgColor
+-- show count of backend table in badge
+-- config moment of content script injection
+-- styling etc
+-- simple selection v. (slower?) rect rendering
+-- brand: zelect, super select, human scraper, web glass,
+-- oss w/ readme/writeup
+-- ask hn; is this useful? etc.
+    - ucs: note taking, semantic blog extract, vocab/dictionary, pl learning, cocktails/recipes, ml training, flash cards, etc.
+-- MOVE ON
+
+future
+-- download csv gets filename
+-- scrollable buffer
+-- capture simple styles in the selection
+    - tinymce integration in table
+    - http://stackoverflow.com/questions/5084713/copying-styled-text-from-a-page-to-the-clipboard-with-javascript
+-- rapid visiting of urls in a list
+-- capture element metadata as well
+-- separately named tables, active table, etc
+-- buffer splits, joins, manipulations, separate buffers, etc
+-- better ux animations (e.g. buffer adds/removes animates badly)
+-- multilang testing
+
+other
+-- O/n of traversals
+-- org om components for minimal odm diffs/updates
+-- reconnect to bg page after extension refresh/update!
+-- save-buffer! v. om :remotes
+-- when to use #shadow-dom
+-- lose jquery, use goog.dom,*; document.querySelector(), etc.
+-- lose dexie
+-- core.async + pubsub to dispatch window resize/scroll/etc
+-- core.async for click etc events?
+-- react devtools?
+-- unit testing?
+
+ideas
+-- modes: simple, magic, pro
+-- color inversion
+-- user-defined table schemas
+-- optionally convert smart quotes elipses etc?
