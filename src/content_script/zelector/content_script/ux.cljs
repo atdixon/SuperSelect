@@ -110,6 +110,12 @@
    (fn []
      (swap! state assoc :active value))})
 
+(defmethod mutate 'active/toggle
+  [{:keys [state]} _ _]
+  {:action
+   (fn []
+     (swap! state update :active not))})
+
 ;; --- ui functions ---
 
 (defn single-rect? [range]
@@ -223,7 +229,8 @@
 (defui BufferView
   Object
   (render [this]
-    (let [buffer (om/props this)]
+    (let [{:keys [buffer active]} (om/props this)
+          clear-buffer! #(om/transact! this `[(buffer/clear) :buff])]
       (dom/div
         #js {:id "zelector-buffer"}
         (if-not (empty? buffer)
@@ -239,10 +246,17 @@
                         buffer)))))
         (dom/div #js {:className "zelector-action-bar"}
                  (dom/div #js {:style #js {}}
-                          (dom/b nil "zselect") ": enabled")
-                 (dom/div #js {:style #js {}}
-                           (dom/a #js {} "clear")
-                           (dom/a #js {} "save")))))))
+                          (dom/b nil "Zelector") ": "
+                          (dom/span #js {:style #js {:cursor "pointer"}
+                                         :onClick #(om/transact! this '[(active/toggle)])}
+                                    (if active "enabled" "disabled")))
+                 (dom/div #js {:style #js {:float "right"}}
+                           (dom/a #js {:href "#" :title "Clear this buffer"
+                                       :onClick #(clear-buffer!)} "clear")
+                           (dom/a #js {:href "#" :title "Save this buffer to the backend"
+                                       :onClick (fn [event]
+                                                  (save-buffer!)
+                                                  (clear-buffer!))} "save")))))))
 (def buffer (om/factory BufferView))
 
 (defui ContextMenu
@@ -333,7 +347,7 @@
           glass-border-width 5]
       (dom/div
         nil
-        (buffer buff)
+        (buffer {:buffer buff :active active})
         (when active
           (dom/div
             #js {:id "zelector-glass"
@@ -459,6 +473,10 @@
     (aget 0)))
 
 (defn init! []
-  (log "CONTENT SCRIPT / UX: init")
   (bgx/init!)
+  (om/add-root! reconciler Zelector (install-glass-mount!)))
+
+(defn init-basic!
+  "Init w/o a browser extension context."
+  []
   (om/add-root! reconciler Zelector (install-glass-mount!)))

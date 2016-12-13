@@ -1,5 +1,3 @@
--- s/lantana/zselect/
--- move to zelect nses and repo
 -- keypress repeats - no good?
 -- no activate if keypress target is an input element
 -- slightly wider buffer

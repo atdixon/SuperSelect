@@ -5,4 +5,4 @@
 
 (log "sandbox time")
 
-(comment ux/init!)
+(ux/init-basic!)

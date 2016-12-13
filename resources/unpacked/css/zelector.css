@@ -45,7 +45,6 @@
     margin: 0;
     padding: 0;
     border-radius: 0;
-    border: 2px solid #494949;
 
     font-family: Times, serif;
     font-size: 15px;
@@ -54,6 +53,7 @@
 #zelector-buffer ul {
     margin: 0;
     padding: 0;
+    border: 2px solid #494949;
 }
 #zelector-buffer li {
     display: flex;
@@ -86,6 +86,9 @@
     margin: 0 10px;
     width: 300px;
 }
+.zelector-buffer-item-delete {
+    cursor: pointer;
+}
 .zelector-buffer-item-enter {
     opacity: 0.01;
     max-height: 0;
@@ -105,10 +108,21 @@
 
 /* action bar */
 #zelector-buffer .zelector-action-bar {
-    border: 1px solid white;
+    border: 2px solid #494949;
+    margin-top: 2px;
+    padding: 2px;
     font-family: Arial, serif;
     font-size: 10px;
     background-color: rgba(0, 0, 0, 0.6);
+}
+
+#zelector-buffer .zelector-action-bar div {
+    display: inline-block;
+}
+
+#zelector-buffer .zelector-action-bar a {
+    color: white;
+    margin-left: 5px;
 }
 
 /* context menu */
@@ -140,7 +154,7 @@
     padding: 3px 6px;
 }
 .zelector-context-menu-item.zelector-disabled {
-    color: gray;
+    color: #808080;
 }
 .zelector-context-menu .fa {
     width: 10px;

@@ -88,7 +88,7 @@
              {:cljsbuild
               {:builds
                [{:id "sandbox"
-                 :source-paths ["src/sandbox" "src/common"]
+                 :source-paths ["src/sandbox" "src/content_script" "src/common"]
                  :figwheel true
                  :compiler {:output-to "resources/unpacked/compiled/sandbox/main.js"
                             :output-dir "resources/unpacked/compiled/sandbox"
