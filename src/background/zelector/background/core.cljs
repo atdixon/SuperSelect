@@ -9,9 +9,7 @@
     [chromex.chrome-event-channel :refer [make-chrome-event-channel]]
     [chromex.protocols :refer [post-message! get-sender]]
     [chromex.ext.runtime :as runtime]
-    [chromex.ext.browser-action :as browser-action]
     [chromex.ext.extension :refer-macros [get-url]]
-    [chromex.ext.tabs :as tabs]
     [zelector.common.util :as util]
     [zelector.common.db :as db]))
 
@@ -52,15 +50,6 @@
   (post-message! client "hello from BACKGROUND PAGE!")
   (run-client-message-loop! client))
 
-(defn handle-browser-action! [tab]
-  (let [workspace-url (get-url "workspace.html")
-        query-channel (tabs/query (clj->js {:url workspace-url}))]
-    ; note: best effort; we don't handle callback errors
-    (go (let [found-tabs (first (<! query-channel))]
-          (if (empty? found-tabs)
-            (tabs/create (clj->js {:url workspace-url}))
-            (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))))))
-
 ; --- event loop ---
 
 (defn process-chrome-event [event-num event]
@@ -68,7 +57,6 @@
   (let [[event-id event-args] event]
     (case event-id
       ::runtime/on-connect (apply handle-client-connection! event-args)
-      ::browser-action/on-clicked (apply handle-browser-action! event-args)
       nil)))
 
 (defn run-chrome-event-loop! [chrome-event-channel]
@@ -81,8 +69,6 @@
   (let [chrome-event-channel (make-chrome-event-channel (chan))]
     (runtime/tap-on-connect-events chrome-event-channel)
     (runtime/tap-on-message-events chrome-event-channel)
-    ; todo --
-    (comment browser-action/tap-on-clicked-events chrome-event-channel)
     (run-chrome-event-loop! chrome-event-channel)))
 
 ; --- init ---
