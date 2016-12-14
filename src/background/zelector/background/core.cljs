@@ -81,7 +81,8 @@
   (let [chrome-event-channel (make-chrome-event-channel (chan))]
     (runtime/tap-on-connect-events chrome-event-channel)
     (runtime/tap-on-message-events chrome-event-channel)
-    (browser-action/tap-on-clicked-events chrome-event-channel)
+    ; todo --
+    (comment browser-action/tap-on-clicked-events chrome-event-channel)
     (run-chrome-event-loop! chrome-event-channel)))
 
 ; --- init ---

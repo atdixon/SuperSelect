@@ -1,5 +1,6 @@
 (ns zelector.common.util
-  (:require [clojure.string :as str]
+  (:require [chromex.logging :refer-macros [log info warn error group group-end]]
+            [clojure.string :as str]
             [cljsjs.jquery]
             [jayq.core :as j]))
 
@@ -99,15 +100,20 @@
   (and (element-node? node)
        (= "body" (.toLowerCase (tag-name node)))))
 
+(defn input-node? [node]
+  (and (element-node? node)
+       (= "input" (.toLowerCase (tag-name node)))))
+
 (defn visible-node? [node]
   (if (text-node? node)
-    (visible-node? (parent-node node))
+    (recur (parent-node node))
     (j/is (j/$ node) ":visible")))
 
 (defn point->caret-position
-  "Given client (x,y) point, answer position as [container offset]."
+  "Given client (x,y) point, answer position as [container offset] or nil
+  if (x,y) is not within text node."
   [x y]
-  (let [range (.caretRangeFromPoint js/document x y)]
+  (when-let [range (.caretRangeFromPoint js/document x y)]
     [(.-startContainer range) (.-startOffset range)]))
 
 (defn- str->camel-case [str]

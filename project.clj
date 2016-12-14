@@ -89,7 +89,7 @@
               {:builds
                [{:id "sandbox"
                  :source-paths ["src/sandbox" "src/content_script" "src/common"]
-                 :figwheel true
+                 :figwheel {:on-jsload "zelector.sandbox/fig-reload-hook"}
                  :compiler {:output-to "resources/unpacked/compiled/sandbox/main.js"
                             :output-dir "resources/unpacked/compiled/sandbox"
                             :asset-path "compiled/sandbox"

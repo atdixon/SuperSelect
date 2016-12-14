@@ -6,6 +6,7 @@
             [zelector.common.trav :as trav]
             [zelector.common.util :as util]
             [goog.object :as gobj]
+            [goog.dom :as gdom]
             [goog.string :as gstr]
             [goog.string.format]
             [cljsjs.jquery]
@@ -249,7 +250,7 @@
                           (dom/b nil "Zelector") ": "
                           (dom/span #js {:style #js {:cursor "pointer"}
                                          :onClick #(om/transact! this '[(active/toggle)])}
-                                    (if active "enabled" "disabled")))
+                                    (if active "active" "inactive")))
                  (dom/div #js {:style #js {:float "right"}}
                            (dom/a #js {:href "#" :title "Clear this buffer"
                                        :onClick #(clear-buffer!)} "clear")
@@ -332,14 +333,18 @@
       (bind js/window "resize.zelector" #(reset-memoizations!))
       (bind js/window "resize.zelector scroll.zelector" #(.forceUpdate this))
       (bind js/document "keydown.zelector"
-            #(if (and (= (.toLowerCase (.-key %)) "z") (.-shiftKey %))
-              (om/transact! this '[(active/set {:value true})])))
-      (bind js/document "keyup.zelector"
-            #(if (= (.toLowerCase (.-key %)) "z")
-              (om/transact! this '[(active/set {:value false})])))))
+            (fn [event]
+              (let [{:keys [active]} (om/props this)
+                    inp? (util/input-node? (.-target event))
+                    key? (and (= (.toLowerCase (.-key event)) "z") (.-shiftKey event))]
+                (if key? (log "k a i" active inp?))
+                (when (and key? (or active (not inp?)))
+                  (when active
+                    (om/transact! this `[(mark/set {:value nil})]))
+                  (om/transact! this '[(active/toggle)])))))))
   (componentWillUnmount [this]
-    (-> js/window j/$ (.unbind "resize.zelector scroll.zelector"))
-    (-> js/document j/$ (.unbind "keydown.zelector keyup.zelector")))
+    (-> js/window j/$ (.unbind ".zelector"))
+    (-> js/document j/$ (.unbind ".zelector")))
   (render [this]
     (let [{:keys [over mark ch buff context-menu-pos freeze active debug-active]} (om/props this)
           combined (if (and mark over) (combine-ranges* mark over))
@@ -359,15 +364,15 @@
                  :onMouseMove (fn [event]
                                 (if-not freeze
                                   (let [glass (.-currentTarget event)
+                                        client-x (.-clientX event)
+                                        client-y (.-clientY event)
                                         ;; must set pointer events inline/immediately
                                         ;; how else do we capture caret position in
                                         ;; underlying doc/body. then must set it back.
-                                        client-x (.-clientX event)
-                                        client-y (.-clientY event)
                                         _ (set! (.-style.pointerEvents glass) "none")
                                         [container index] (util/point->caret-position client-x client-y)
                                         _ (set! (.-style.pointerEvents glass) "auto")]
-                                    (when (trav/visible-text-node? container)
+                                    (when (and container (trav/visible-text-node? container))
                                       (let [text (.-textContent container)
                                             char (get text index)]
                                         (when-not (or (nil? char) (util/whitespace-char? char))
@@ -476,7 +481,14 @@
   (bgx/init!)
   (om/add-root! reconciler Zelector (install-glass-mount!)))
 
+; --- for sandbox usage ---
+
 (defn init-basic!
   "Init w/o a browser extension context."
   []
   (om/add-root! reconciler Zelector (install-glass-mount!)))
+
+(defn destroy-basic! []
+  (let [mount (gdom/getElement "zelector-glass-mount")]
+    (om/remove-root! reconciler mount)
+    (gdom/removeNode mount)))

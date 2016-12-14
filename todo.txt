@@ -1,18 +1,19 @@
--- keypress repeats - no good?
--- no activate if keypress target is an input element
--- slightly wider buffer
+-- configure action bar to always show on all pages but let toggle off/on easy?
 -- buffer sticks across page refreshes and navigations (use synchronous local storage!)
 -- refact. glass, buffer, debug all at same level in container at z-index max.
+-- cohesive keyboard behavior (enabling, esc kills mark, ... what else?)
 -- save / clear buttons/links on buffer (get rid of context menu)
 -- text/color of badge browserAction.setBadgeText/BgColor
 -- show count of backend table in badge
--- config moment of content script injection
+-- clear mark on inactivate glass (first, better om/next data "api")
 -- styling etc
+-- privatize fns
 -- simple selection v. (slower?) rect rendering
 -- brand: zelect, super select, human scraper, web glass,
 -- oss w/ readme/writeup
 -- ask hn; is this useful? etc.
     - ucs: note taking, semantic blog extract, vocab/dictionary, pl learning, cocktails/recipes, ml training, flash cards, etc.
+-- only after hn, do any extra mktg or what have you
 -- MOVE ON
 
 future
