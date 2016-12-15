@@ -54,7 +54,7 @@
                                              :provides ["handsontable"]}]}}
                  {:id "popup"
                   :source-paths ["src/popup" "src/common"]
-                  :figwheel true
+                  :figwheel {:on-jsload "zelector.popup.core/fig-reload-hook"}
                   :compiler {:output-to "resources/unpacked/compiled/popup/main.js"
                              :output-dir "resources/unpacked/compiled/popup"
                              :asset-path "compiled/popup"

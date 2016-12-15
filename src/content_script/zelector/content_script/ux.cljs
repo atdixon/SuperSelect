@@ -12,7 +12,7 @@
             [cljsjs.jquery]
             [jayq.core :as j]))
 
-;; helpful
+; helpful
 
 (defn curr-window-size []
   (let [$win (j/$ js/window)]
@@ -21,14 +21,22 @@
 (defn vec-remove [coll pos]
   (vec (concat (subvec coll 0 pos) (subvec coll (inc pos)))))
 
-;; CSSTransitionGroup
+; CSSTransitionGroup
 
 (defn css-transition-group [props children]
   (js/React.createElement
     js/React.addons.CSSTransitionGroup
     (clj->js (merge props {:children children}))))
 
-;; --- state ---
+; --- remote ---
+
+(defn save-buffer! []
+  (let [st @state
+        {:keys [buff]} st
+        as-record (map :content buff)]
+    (bgx/post-record! as-record)))
+
+; --- state ---
 
 (defonce
   state
@@ -40,14 +48,6 @@
          :active            false
          :debug-active      false
          :buff              []}))
-
-(defn save-buffer! []
-  (let [st @state
-        {:keys [buff]} st
-        as-record (map :content buff)]
-    (bgx/post-record! as-record)))
-
-;; --- read / mutate ---
 
 (defmulti read om/dispatch)
 (defmulti mutate om/dispatch)
@@ -117,7 +117,7 @@
    (fn []
      (swap! state update :active not))})
 
-;; --- ui functions ---
+; --- ui functions ---
 
 (defn single-rect? [range]
   (<= (count (trav/range->client-rects range)) 1))
@@ -146,7 +146,7 @@
   (trav/partition-range-with* :reset!)
   (partition-range* :reset!))
 
-;; --- ui components ---
+; --- ui components ---
 
 (defui DebugInfo
   Object

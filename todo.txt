@@ -7,7 +7,7 @@
 -- show count of backend table in badge
 -- clear mark on inactivate glass (first, better om/next data "api")
 -- styling etc
--- privatize fns
+-- privatize fns, organize requires
 -- simple selection v. (slower?) rect rendering
 -- brand: zelect, super select, human scraper, web glass,
 -- oss w/ readme/writeup

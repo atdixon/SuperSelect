@@ -11,18 +11,18 @@ h2 {
     padding-left: 20px;
 }
 
-#zelector-popup {
+#app {
     width: 165px;
 }
 
-#zelector-popup ul {
+#app ul {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
     font-size: 12px;
 }
 
-#zelector-popup li {
+#app li {
     cursor: pointer;
     list-style: none;
 
@@ -31,26 +31,30 @@ h2 {
     border-radius: 0;
 }
 
-#zelector-popup li:hover {
+#app li:hover {
     background-color: #eeeeee;
 }
 
-#zelector-popup li .fa {
+#app li .fa {
     margin-right: 15px;
 }
 
-#zelector-popup li .fa-check {
+#app li .fa-check {
     color: #006400;
 }
 
-#zelector-popup li .fa-table {
+#app li .fa-times {
+    color: #8b0000;
+}
+
+#app li .fa-table {
     color: #00b0ff;
 }
 
-#zelector-popup li .fa-wrench {
+#app li .fa-wrench {
     color: #2f4f4f;
 }
 
-#zelector-popup li {
+#app li {
     border-top: 1px dashed #a9a9a9;
 }
