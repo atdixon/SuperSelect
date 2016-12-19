@@ -8,7 +8,6 @@
 (defonce bg-port (atom nil))
 
 ; -- message loop --
-
 (defn process-message! [message]
   (log "CONTENT SCRIPT: got message:" message))
 
@@ -16,22 +15,19 @@
 
 (defn run-message-loop! []
   (go-loop []
-           (when-let [message (<! @bg-port)]
-             (process-message! message)
-             (recur))))
+    (when-let [message (<! @bg-port)]
+      (process-message! message)
+      (recur))))
 
 ; -- more --
-
 (defn connect-to-background-page! []
   (reset! bg-port (runtime/connect))
   (run-message-loop!))
 
 ; -- api --
-
 (defn post-record! [record]
   (post-message! @bg-port (clj->js {:record record})))
 
 ; -- init --
-
 (defn init! []
   (connect-to-background-page!))
