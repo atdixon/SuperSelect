@@ -4,8 +4,7 @@
             [cljsjs.jquery]
             [jayq.core :as j]))
 
-;; basics
-
+; --- basic ---
 (defn any [coll]
   "Answers any item from coll. If coll is nil,
   returns nil."
@@ -38,8 +37,21 @@
             (swap! mem assoc args ret)
             ret))))))
 
-;; dom
+; --- js/clj ---
+(defn- keyword->fqn [kw]
+  (if-let [ns (namespace kw)]
+    (str ns "/" (name kw))
+    (name kw)))
 
+(extend-type Keyword
+  IEncodeJS
+  (-clj->js [x] (keyword->fqn x))
+  (-key->js [x] (keyword->fqn x)))
+
+(defn js->clj* [val]
+  (clojure.walk/keywordize-keys (js->clj val)))
+
+; --- dom ---
 (extend-type js/NodeList
   ISeqable
   (-seq [node-list] (array-seq node-list)))
@@ -141,11 +153,13 @@
     (into {} (filter (fn [[_ val]] (not (nil? val)))
                      (map #(vector (-> % str->camel-case keyword) (.css $elem %)) css-props)))))
 
-; pretty
+; --- pretty ---
+(defn thing->pretty [thing]
+  (with-out-str (cljs.pprint/pprint thing)))
 
-(defn pretty [node]
+(defn pretty-node [node]
   (if (seq? node)
-    (str/join "," (map pretty node))
+    (str/join "," (map pretty-node node))
     (let [node-type (if-not (nil? node) (node-type node))]
       (case node-type
         1 (str (.toLowerCase (j/prop (j/$ node) "tagName"))

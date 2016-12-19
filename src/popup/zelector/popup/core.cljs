@@ -3,97 +3,117 @@
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
             [chromex.ext.extension :refer-macros [get-url]]
             [chromex.ext.tabs :as tabs]
-            [cljs.core.async :refer [<! chan]]
+            [cljs.core.async :refer [<! >! put! chan]]
             [goog.object :as gobj]
             [goog.dom :as gdom]
-            [goog.events :as gvnt]
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
+            [zelector.common.bgx :as bgx]
             [zelector.common.util :as util]))
 
 ; --- support ---
-
 (defn- close-popup! []
   (.close js/window))
 
-; --- behavior ---
+; --- actions ---
 (defn- open-workspace! []
-  (let [workspace-url (get-url "workspace.html")
-        query-channel (tabs/query (clj->js {:url workspace-url}))]
-    ; note: best effort; we don't handle callback errors
-    (go (let [found-tabs (first (<! query-channel))]
-          (if (empty? found-tabs)
-            (tabs/create (clj->js {:url workspace-url}))
-            (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))))))
+  (let [url (get-url "workspace.html")
+        res (tabs/query (clj->js {:url url}))]
+    (go
+      (let [found-tabs (first (<! res))]
+        (if (empty? found-tabs)
+          (tabs/create (clj->js {:url url}))
+          (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))))))
 
 ; --- state ---
-(defonce state (atom {:enabled true}))
+;   assume z/enabled true until proven otherwise; om/next
+;   behaves better when initial state is present. (i.e.,
+;   does not seem to do an *initial* render component
+;   appropriately on om/merge)
+(defonce state (atom {:z/enabled false}))
 
 (defmulti read om/dispatch)
 (defmulti mutate om/dispatch)
 
 (defmethod read :default
-  [{:keys [state] :as env} key params]
+  [{:keys [state]} key _]
   (let [st @state]
-    {:value (key st)}))
+    (log "reading ->" (get st key))
+    {:value (get st key)
+     :remote true}))
 
-(defmethod mutate 'toggle-enabled
-  [{:keys [state]} _ _]
-  {:action
-   (fn []
-     (swap! state update :enabled not))})
+(defmethod mutate 'z/update
+  [env key params]
+  {:remote true})
+
+; --- remote ---
+(defn- remote
+  "Handle remote/send."
+  [{:keys [remote]} cb]
+  (let [ast (-> remote om/query->ast :children first)]
+    (case (:type ast)
+      :prop (do
+              (log "post:" {:action "config"})
+              (bgx/post-message! {:action "config"}))
+      :call (when (= (:key ast) 'z/update)
+              (log "post:" {:action "config" :params (:params ast)})
+              (bgx/post-message! {:action "config"
+                                  :params (:params ast)})))))
 
 ; --- ui ---
 (defui Popup
   static om/IQuery
-  (query [this] '[:enabled])
+  (query [this] '[:z/enabled])
   Object
   (render [this]
-    (let [{:keys [enabled]} (om/props this)
-          toggle-enabled! #(om/transact! this '[(toggle-enabled)])]
+    (let [{:keys [z/enabled]} (om/props this)]
+      (log "rendering" enabled)
       (dom/div
         #js {}
         (dom/h2 #js {} "Zelector")
         (dom/ul #js {}
                 (if enabled
-                  (dom/li #js {:onClick toggle-enabled!} (dom/span #js {:className "fa fa-check"}) "Enabled")
-                  (dom/li #js {:onClick toggle-enabled!} (dom/span #js {:className "fa fa-times"}) "Disabled"))
+                  (dom/li #js {:onClick #(om/transact! this '[(z/update {:z/enabled false})])}
+                          (dom/span #js {:className "fa fa-check"}) "Enabled")
+                  (dom/li #js {:onClick #(om/transact! this '[(z/update {:z/enabled true})])}
+                          (dom/span #js {:className "fa fa-times"}) "Disabled"))
                 (dom/li #js {:onClick #(do (open-workspace!) (close-popup!))}
-                        (dom/span #js {:className "fa fa-table"}) "Go to Workspace")
-                (dom/li #js {} (dom/span #js {:className "fa fa-wrench"}) "Options"))))))
+                        (dom/span #js {:className "fa fa-table"}) "Go to Workspace"))))))
+
+(def parser
+  (om/parser {:read read :mutate mutate}))
 
 (def reconciler
   (om/reconciler
     {:state  state
-     :parser (om/parser {:read read :mutate mutate})}))
+     :parser parser
+     :send   remote}))
 
-; --- todo ---
+; --- background ---
+; handle messages like, e.g.,
+;   {action: "config",
+;    params: {z/enabled: true}}
+(defn handle-message! [msg]
+  (log "handling" msg)
+  (let [{:keys [action params]} (util/js->clj* msg)]
+    (case action
+      "config" (om.next/merge! reconciler params)
+      nil)))
 
-(defn- listen*! [class evt-type callback]
-  "Given element class, event type and callback, add click event."
-  (-> class gdom/getElementByClass (gvnt/listen evt-type callback)))
-
-(defn- unlisten*! [class evt-type]
-  (-> class gdom/getElementByClass (gvnt/removeAll evt-type)))
-
-(defn- add-click-listeners! []
-  (listen*! "li-enbl" "click" #(log "clicked enable"))
-  (listen*! "li-wksp" "click" #(open-workspace!))
-  (listen*! "li-opts" "click" #(log "clicked opts"))
-  (doseq [class ["li-wksp"]]
-    (listen*! class "click" #(close-popup!))))
-
-(defn- remove-click-listeners! []
-  (doseq [class ["li-enbl" "li-wksp" "li-opts"]]
-    (unlisten*! class "click")))
+(defn backgound-connect! []
+  (let [port (bgx/connect!)]
+    (go-loop []
+      (when-let [msg (<! port)]
+        (handle-message! msg)
+        (recur)))))
 
 ; --- lifecycle ---
-
 (defn fig-reload-hook []
   (log "fig-reload-hook")
-  (remove-click-listeners!)
-  (add-click-listeners!))
+  (om/remove-root! reconciler (gdom/getElement "app"))
+  (om/add-root! reconciler Popup (gdom/getElement "app")))
 
 (defn init! []
-  (log "POPUP: init")
+  (log "popup: init")
+  (backgound-connect!)
   (om/add-root! reconciler Popup (gdom/getElement "app")))

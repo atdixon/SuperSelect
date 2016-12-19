@@ -1,11 +1,11 @@
 (ns zelector.common.db
-  (:require
-    [goog.object :as gobj]
-    [chromex.logging :refer-macros [log info warn error group group-end]]
-    [dexie]))
+  (:require [chromex.logging :refer-macros [log info warn error group group-end]]
+            [goog.object :as gobj]
+            [dexie]
+            [zelector.common.util]))
 
 (defn create-db! []
-  (let [db (js/Dexie. "Glass" #js {:autoOpen true})]
+  (let [db (js/Dexie. "Zelector" #js {:autoOpen true})]
     (-> db
       (.version 1)
       (.stores #js {:snippets "++id, record"}))

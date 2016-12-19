@@ -1,3 +1,4 @@
+-- NEXT: chrome storage enablement
 -- configure action bar to always show on all pages but let toggle off/on easy?
 -- buffer sticks across page refreshes and navigations (use synchronous local storage!)
 -- refact. glass, buffer, debug all at same level in container at z-index max.
@@ -8,6 +9,8 @@
 -- clear mark on inactivate glass (first, better om/next data "api")
 -- styling etc
 -- privatize fns, organize requires
+-- handling port disconnects (e.g. bg cxns clients)
+-- compiler warnings (see pocket)
 -- simple selection v. (slower?) rect rendering
 -- brand: zelect, super select, human scraper, web glass,
 -- oss w/ readme/writeup
@@ -47,3 +50,6 @@ ideas
 -- color inversion
 -- user-defined table schemas
 -- optionally convert smart quotes elipses etc?
+
+om/next bugs?
+-- if state.flag = nil, component *not* rendered but subsequent merge will not yield initial component render

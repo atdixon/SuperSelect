@@ -1,19 +1,20 @@
 (ns zelector.content-script.ux
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
+            [cljs.core.async :refer [<! >! put! chan]]
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
-            [zelector.content-script.bgx :as bgx]
-            [zelector.common.trav :as trav]
-            [zelector.common.util :as util]
             [goog.object :as gobj]
             [goog.dom :as gdom]
             [goog.string :as gstr]
             [goog.string.format]
             [cljsjs.jquery]
-            [jayq.core :as j]))
+            [jayq.core :as j]
+            [zelector.common.bgx :as bgx]
+            [zelector.common.trav :as trav]
+            [zelector.common.util :as util]))
 
-; helpful
-
+; --- util ---
 (defn curr-window-size []
   (let [$win (j/$ js/window)]
     [(.width $win) (.height $win)]))
@@ -21,33 +22,26 @@
 (defn vec-remove [coll pos]
   (vec (concat (subvec coll 0 pos) (subvec coll (inc pos)))))
 
-; CSSTransitionGroup
-
 (defn css-transition-group [props children]
   (js/React.createElement
     js/React.addons.CSSTransitionGroup
     (clj->js (merge props {:children children}))))
 
-; --- remote ---
-
-(defn save-buffer! []
-  (let [st @state
-        {:keys [buff]} st
-        as-record (map :content buff)]
-    (bgx/post-record! as-record)))
-
 ; --- state ---
-
 (defonce
   state
-  (atom {:ch                nil
-         :over              nil
-         :mark              nil
-         :context-menu-pos  nil
-         :freeze            nil
-         :active            false
-         :debug-active      false
-         :buff              []}))
+  (atom {:ch nil
+         :over nil
+         :mark nil
+         :freeze nil
+         :active false
+         :debug-active true
+         :buff []
+         :flags {:debugged nil
+                 :frozen nil}
+         ; configure durables w/ defaults until proven otherwise
+         :durable {:z/enabled true
+                   :z/active false}}))
 
 (defmulti read om/dispatch)
 (defmulti mutate om/dispatch)
@@ -57,6 +51,19 @@
   (let [st @state]
     {:value (key st)}))
 
+; todo
+(defmethod mutate 'z/set-flag
+  [{:keys [state]} _ params]
+  {:action
+   (fn []
+     (swap! state update :flags merge params))})
+
+(defmethod mutate 'z/update-durable
+  [{:keys [state]} _ params]
+  {:remote true})
+
+; todo plugin enabled (also how do updates to storage get pushed out to content scripts etc)
+; todo simplify mutates to 'z/set
 (defmethod mutate 'over/set
   [{:keys [state]} _ {:keys [value]}]
   {:action
@@ -74,12 +81,6 @@
   {:action
    (fn []
      (swap! state assoc :ch value))})
-
-(defmethod mutate 'context-menu/set
-  [{:keys [state]} _ {:keys [value]}]
-  {:action
-   (fn []
-     (swap! state assoc :context-menu-pos value))})
 
 (defmethod mutate 'buffer/push
   [{:keys [state]} _ {:keys [value]}]
@@ -117,8 +118,29 @@
    (fn []
      (swap! state update :active not))})
 
-; --- ui functions ---
+; --- remote ---
+(defn- remote
+  "Handle remote/send."
+  [{:keys [remote]} cb]
+  (let [ast (-> remote om/query->ast :children first)]
+    (case (:type ast)
+      :prop (do
+              (log "post:" {:action "config"})
+              (bgx/post-message! {:action "config"}))
+      :call (when (= (:key ast) 'z/update-durable)
+              (log "post:" {:action "config" :params (:params ast)})
+              (bgx/post-message! {:action "config"
+                                  :params (:params ast)})))))
 
+; --- actions ---
+; todo orchestrate w/ :remote?
+(defn save-buffer! []
+  (let [st @state
+        {:keys [buff]} st
+        as-record (map :content buff)]
+    (comment bgx/post-record! as-record)))
+
+; --- ui functions ---
 (defn single-rect? [range]
   (<= (count (trav/range->client-rects range)) 1))
 
@@ -147,7 +169,6 @@
   (partition-range* :reset!))
 
 ; --- ui components ---
-
 (defui DebugInfo
   Object
   (render [this]
@@ -164,9 +185,9 @@
                         (dom/br #js {:key "1b"})
                         (gstr/format
                           "%s[%s]...%s[%s]"
-                          (util/pretty (util/parent-node sc))
+                          (util/pretty-node (util/parent-node sc))
                           (util/node->sibling-index sc)
-                          (util/pretty (util/parent-node ec))
+                          (util/pretty-node (util/parent-node ec))
                           (util/node->sibling-index ec))
                         (dom/br #js {:key "2a"})
                         "---"
@@ -260,72 +281,9 @@
                                                   (clear-buffer!))} "save")))))))
 (def buffer (om/factory BufferView))
 
-(defui ContextMenu
-  Object
-  (render [this]
-    (let [{:keys [over mark context-menu-pos freeze]} (om/props this)
-          [top left] context-menu-pos
-          [window-width window-height] (curr-window-size)
-          clear-mark! #(om/transact! this `[(mark/set {:value nil})])
-          clear-context-menu! #(om/transact! this `[(context-menu/set {:value nil}) :context-menu-pos])
-          clear-buffer! #(om/transact! this `[(buffer/clear) :buff])]
-      ; we render super-glass with content menu (makes it easier to respond to clicks outside
-      ; of contenxt menu and prevent propagation of some events to glass when context menu is up)
-      (dom/div
-        #js {:style
-             #js {:top    0
-                  :left   0
-                  :width  window-width
-                  :height window-height}
-             :onMouseMove #(.stopPropagation %)
-             :onClick     (fn [event]
-                            (.stopPropagation event)
-                            (clear-context-menu!))}
-        (dom/nav
-          #js {:className     "zelector-context-menu"
-               :style         #js {:top top :left left}
-               :onClick       #(.stopPropagation %)
-               :onContextMenu #(.preventDefault %)
-               :onMouseLeave  clear-context-menu!}
-          (dom/ul
-            nil
-            (dom/li
-              (if mark
-                #js {:className "zelector-context-menu-item"
-                     :onClick
-                     (fn [event]
-                       (clear-mark!)
-                       (clear-context-menu!))}
-                #js {:className "zelector-context-menu-item zelector-disabled"})
-              (dom/span #js {:className "fa fa-rotate-left"})
-              (dom/span nil "Clear Mark"))
-            (dom/li #js {:className "zelector-context-menu-item-separator"})
-            (dom/li #js {:className "zelector-context-menu-item"
-                         :onClick   (fn [event]
-                                      (save-buffer!)
-                                      (clear-buffer!)
-                                      (clear-context-menu!))}
-                    (dom/span #js {:className "fa fa-save"})
-                    (dom/span nil "Save Current Buffer"))
-            (dom/li #js {:className "zelector-context-menu-item"
-                         :onClick   (fn [event]
-                                      (clear-buffer!)
-                                      (clear-context-menu!))}
-              (dom/span #js {:className "fa fa-times"})
-              (dom/span nil "Purge Current Buffer"))
-            (if-not freeze
-              (list (dom/li #js {:key 1 :className "zelector-context-menu-item-separator"})
-                (dom/li #js {:key     2 :className "zelector-context-menu-item"
-                             :onClick (fn [event]
-                                        (om/transact! this `[(debug/toggle-freeze)])
-                                        (clear-context-menu!))}
-                  (dom/span #js {:className "fa"})
-                  (dom/span nil "Debug: Freeze"))))))))))
-(def context-menu (om/factory ContextMenu))
-
 (defui Zelector
   static om/IQuery
-  (query [this] '[:over :mark :ch :buff :context-menu-pos :freeze :active :debug-active])
+  (query [this] '[:over :mark :ch :buff :freeze :active :debug-active :durable])
   Object
   (componentDidMount [this]
     (letfn [(bind [target jq-event-type handler]
@@ -346,126 +304,115 @@
     (-> js/window j/$ (.unbind ".zelector"))
     (-> js/document j/$ (.unbind ".zelector")))
   (render [this]
-    (let [{:keys [over mark ch buff context-menu-pos freeze active debug-active]} (om/props this)
+    (let [{:keys [over mark ch buff freeze active debug-active]} (om/props this)
+          {{:keys [:z/enabled]} :durable} (om/props this)
           combined (if (and mark over) (combine-ranges* mark over))
           [window-width window-height] (curr-window-size)
           glass-border-width 5]
-      (dom/div
-        nil
-        (buffer {:buffer buff :active active})
-        (when active
-          (dom/div
-            #js {:id "zelector-glass"
-                 :style
-                 #js {:top 0
-                      :left 0
-                      :width (- window-width glass-border-width glass-border-width)
-                      :height (- window-height glass-border-width glass-border-width)}
-                 :onMouseMove (fn [event]
-                                (if-not freeze
-                                  (let [glass (.-currentTarget event)
-                                        client-x (.-clientX event)
-                                        client-y (.-clientY event)
-                                        ;; must set pointer events inline/immediately
-                                        ;; how else do we capture caret position in
-                                        ;; underlying doc/body. then must set it back.
-                                        _ (set! (.-style.pointerEvents glass) "none")
-                                        [container index] (util/point->caret-position client-x client-y)
-                                        _ (set! (.-style.pointerEvents glass) "auto")]
-                                    (when (and container (trav/visible-text-node? container))
-                                      (let [text (.-textContent container)
-                                            char (get text index)]
-                                        (when-not (or (nil? char) (util/whitespace-char? char))
-                                          (let [range (trav/position->word-range [container index])]
-                                            (om/transact! this
-                                                          `[(ch/set {:value ~char})
-                                                            (over/set {:value ~range})]))))))))
-                 ; todo - instead of toString on combined, really need to strip long sequences of
-                 ; todo      whitespace, convert paragraph, br, etc. breaks into newlines etc. -- how?
-                 :onClick (fn [event]
-                            (if mark
-                              (om/transact! this `[(buffer/push {:value ~(trav/range->str combined)})
-                                                   (mark/set {:value nil})])
-                              (om/transact! this `[(mark/set {:value ~over})])))
-                 :onContextMenu (fn [event]
-                                  (.preventDefault event)
-                                  (if (.hasFocus js/document)
-                                    ; dec some to ensure mouse is within menu that we pop-up
-                                    (let [menu-x (- (.-clientX event) 10)
-                                          menu-y (- (.-clientY event) 5)]
-                                      (om/transact! this `[(context-menu/set {:value ~[menu-y menu-x]}) :context-menu-pos]))))}
-            (when combined
-              (list
-                ; render full combined range as solid block (background)
+      (log "enabled = " enabled)
+      (when enabled
+        (dom/div
+          nil
+          (buffer {:buffer buff :active active})
+          (when active
+            (dom/div
+              #js {:id "zelector-glass"
+                   :style
+                   #js {:top 0
+                        :left 0
+                        :width (- window-width glass-border-width glass-border-width)
+                        :height (- window-height glass-border-width glass-border-width)}
+                   :onMouseMove (fn [event]
+                                  (if-not freeze
+                                    (let [glass (.-currentTarget event)
+                                          client-x (.-clientX event)
+                                          client-y (.-clientY event)
+                                          ;; must set pointer events inline/immediately
+                                          ;; how else do we capture caret position in
+                                          ;; underlying doc/body. then must set it back.
+                                          _ (set! (.-style.pointerEvents glass) "none")
+                                          [container index] (util/point->caret-position client-x client-y)
+                                          _ (set! (.-style.pointerEvents glass) "auto")]
+                                      (when (and container (trav/visible-text-node? container))
+                                        (let [text (.-textContent container)
+                                              char (get text index)]
+                                          (when-not (or (nil? char) (util/whitespace-char? char))
+                                            (let [range (trav/position->word-range [container index])]
+                                              (om/transact! this
+                                                `[(ch/set {:value ~char})
+                                                  (over/set {:value ~range})]))))))))
+                   ; todo - instead of toString on combined, really need to strip long sequences of
+                   ; todo      whitespace, convert paragraph, br, etc. breaks into newlines etc. -- how?
+                   :onClick (fn [event]
+                              (if mark
+                                (om/transact! this `[(buffer/push {:value ~(trav/range->str combined)})
+                                                     (mark/set {:value nil})])
+                                (om/transact! this `[(mark/set {:value ~over})])))}
+              (when combined
+                (list
+                  ; render full combined range as solid block (background)
+                  (map-indexed
+                    #(let [border-width 2]
+                      (dom/div
+                        #js {:key %1
+                             :className "zelector-selection-base-rect"
+                             :style #js {:borderWidth border-width
+                                         :top (- (.-top %2) border-width)
+                                         :left (- (.-left %2) border-width)
+                                         :width (inc (.-width %2))
+                                         :height (inc (.-height %2))}}))
+                    (trav/range->client-rects combined))
+                  ; render div and styled text for each char (or word or ...)
+                  (for [[[sc _] [_ _] :as split] (partition-range* combined)
+                        :let [parent-node (util/parent-node sc)
+                              text-styles (util/elem->text-styles parent-node)]]
+                    ; note: we map here over all client rects but split should have produced only one client rect
+                    (map-indexed
+                      (fn [i rect]
+                        (let [border-width 0]               ; note: enable border-width to see range outlines
+                          (dom/div
+                            #js {:key i
+                                 :className "zelector-selection-text-rect"
+                                 :style (clj->js
+                                          ; a couple of games to play here:
+                                          ; - we own "text-overflow" and "white-space" in our css
+                                          ;  - we translate "text-align" to "text-align-last" since
+                                          ;    we are always guaranteed to be rendering single-line rects
+                                          (merge (dissoc text-styles :textOverflow :whiteSpace :textAlign)
+                                            {:textAlignLast (:textAlign text-styles)
+                                             :borderWidth border-width
+                                             :top (- (.-top rect) border-width)
+                                             :left (- (.-left rect) border-width)
+                                             :width (inc (.-width rect))
+                                             :height (inc (.-height rect))}))}
+                            (trav/range->str split))))
+                      (trav/range->client-rects split)))))
+              (when mark
                 (map-indexed
                   #(let [border-width 2]
                     (dom/div
                       #js {:key %1
-                           :className "zelector-selection-base-rect"
+                           :className "zelector-selection-mark-rect"
                            :style #js {:borderWidth border-width
                                        :top (- (.-top %2) border-width)
                                        :left (- (.-left %2) border-width)
                                        :width (inc (.-width %2))
                                        :height (inc (.-height %2))}}))
-                  (trav/range->client-rects combined))
-                ; render div and styled text for each char (or word or ...)
-                (for [[[sc _] [_ _] :as split] (partition-range* combined)
-                      :let [parent-node (util/parent-node sc)
-                            text-styles (util/elem->text-styles parent-node)]]
-                  ; note: we map here over all client rects but split should have produced only one client rect
-                  (map-indexed
-                    (fn [i rect]
-                      (let [border-width 0]                 ; note: enable border-width to see range outlines
-                        (dom/div
-                          #js {:key i
-                               :className "zelector-selection-text-rect"
-                               :style (clj->js
-                                        ; a couple of games to play here:
-                                        ; - we own "text-overflow" and "white-space" in our css
-                                        ;  - we translate "text-align" to "text-align-last" since
-                                        ;    we are always guaranteed to be rendering single-line rects
-                                        (merge (dissoc text-styles :textOverflow :whiteSpace :textAlign)
-                                               {:textAlignLast (:textAlign text-styles)
-                                                :borderWidth border-width
-                                                :top (- (.-top rect) border-width)
-                                                :left (- (.-left rect) border-width)
-                                                :width (inc (.-width rect))
-                                                :height (inc (.-height rect))}))}
-                          (trav/range->str split))))
-                    (trav/range->client-rects split)))))
-            (when mark
-              (map-indexed
-                #(let [border-width 2]
-                  (dom/div
-                    #js {:key %1
-                         :className "zelector-selection-mark-rect"
-                         :style #js {:borderWidth border-width
-                                     :top (- (.-top %2) border-width)
-                                     :left (- (.-left %2) border-width)
-                                     :width (inc (.-width %2))
-                                     :height (inc (.-height %2))}}))
-                (trav/range->client-rects mark)))
-            (when over
-              (map-indexed
-                #(let [border-width 2]
-                  (dom/div
-                    #js {:key %1
-                         :className "zelector-selection-over-rect"
-                         :style #js {:borderWidth border-width
-                                     :top (- (.-top %2) border-width)
-                                     :left (- (.-left %2) border-width)
-                                     :width (inc (.-width %2))
-                                     :height (inc (.-height %2))}}))
-                (trav/range->client-rects over)))
-            (when debug-active
-              (debug-info {:captured/range combined :over over :char ch :freeze freeze}))
-            ; context-menu last so it renders over everything
-            (when context-menu-pos
-              (context-menu
-                {:over over
-                 :mark mark
-                 :context-menu-pos context-menu-pos
-                 :freeze freeze}))))))))
+                  (trav/range->client-rects mark)))
+              (when over
+                (map-indexed
+                  #(let [border-width 2]
+                    (dom/div
+                      #js {:key %1
+                           :className "zelector-selection-over-rect"
+                           :style #js {:borderWidth border-width
+                                       :top (- (.-top %2) border-width)
+                                       :left (- (.-left %2) border-width)
+                                       :width (inc (.-width %2))
+                                       :height (inc (.-height %2))}}))
+                  (trav/range->client-rects over)))
+              (when debug-active
+                (debug-info {:captured/range combined :over over :char ch :freeze freeze})))))))))
 
 (def reconciler
   (om/reconciler
@@ -477,14 +424,33 @@
     (.appendTo "body")
     (aget 0)))
 
+; --- background ---
+; handle messages like, e.g.,
+;   {action: "config",
+;    params: {z/enabled: true,
+;             z/active: true}}
+(defn handle-message! [msg]
+  (log "handling" msg)
+  (let [{:keys [action params]} (util/js->clj* msg)]
+    (case action
+      "config" (om.next/merge! reconciler {:durable params})
+      nil)))
+
+(defn backgound-connect! []
+  (let [port (bgx/connect!)]
+    (go-loop []
+      (when-let [msg (<! port)]
+        (handle-message! msg)
+        (recur)))))
+
+; --- lifecycle ---
 (defn init! []
-  (bgx/init!)
-  (om/add-root! reconciler Zelector (install-glass-mount!)))
+  (om/add-root! reconciler Zelector (install-glass-mount!))
+  (backgound-connect!))
 
-; --- for sandbox usage ---
-
+; --- for sandbox ---
 (defn init-basic!
-  "Init w/o a browser extension context."
+  "Init w/o a browser extension env."
   []
   (om/add-root! reconciler Zelector (install-glass-mount!)))
 

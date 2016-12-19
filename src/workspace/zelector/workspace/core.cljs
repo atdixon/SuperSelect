@@ -1,21 +1,20 @@
 (ns zelector.workspace.core
   (:require-macros [cljs.core.async.macros :refer [go-loop]])
-  (:require [cljs.core.async :refer [<!]]
-            [chromex.logging :refer-macros [log info warn error group group-end]]
+  (:require [chromex.logging :refer-macros [log info warn error group group-end]]
             [chromex.protocols :refer [post-message!]]
             [chromex.ext.runtime :as runtime :refer-macros [connect]]
+            [cljs.core.async :refer [<!]]
             [goog.object :as gobj]
             [goog.dom :as gdom]
-            [zelector.common.db :as db]
             [cljsjs.jquery]
             [jayq.core :as j]
+            [cljsjs.papaparse]
             [handsontable]
-            [cljsjs.papaparse]))
-
-(defonce bg-port (atom nil))
+            [zelector.common.util :as util]
+            [zelector.common.db :as db]
+            [zelector.common.bgx :as bgx]))
 
 ; --- workspace ---
-
 (defonce hot (atom nil))
 
 (defn create-table []
@@ -60,7 +59,6 @@
   (install-table!))
 
 ; --- table row/data manipulation ---
-
 (defn add-row! [db-id record]
   (let [h @hot
         empty-first-row (.isEmptyRow h 0)
@@ -77,7 +75,6 @@
   (db/with-all-records #(add-row! %1 %2)))
 
 ; --- export ---
-
 (defn get-data []
   (let [h @hot]
     (.getData h)))
@@ -87,27 +84,7 @@
     (.open js/window (str "data:text/csv;charset=utf-8,"
                           (js/encodeURIComponent csv)))))
 
-; --- messaging ---
-
-(defn process-message! [message]
-  (log "WORKSPACE: got message:" message)
-  (if (and (object? message) (gobj/get message "data-refresh"))
-    (load-table-data!)))
-
-(defn run-message-loop! [message-channel]
-  (log "WORKSPACE: starting message loop...")
-  (go-loop []
-           (when-let [message (<! message-channel)]
-             (process-message! message)
-             (recur))
-           (log "WORKSPACE: leaving message loop")))
-
-(defn connect-to-background-page! []
-  (reset! bg-port (runtime/connect))
-  (run-message-loop! @bg-port))
-
 ; --- init ---
-
 (defn bind-handlers! []
   (.bind (j/$ "#download") "click.zelector" #(export-csv))
   (.bind (j/$ "#clear") "click.zelector"
@@ -117,6 +94,25 @@
   (.unbind (j/$ "#download") "click.zelector")
   (.unbind (j/$ "#clear") "click.zelector"))
 
+; --- background ---
+; handle messages like, e.g.,
+;   {action: "refresh",
+;    params: {resource: ["db"]}}
+(defn handle-message! [msg]
+  (log "handling" msg)
+  (let [{:keys [action params]} (util/js->clj* msg)]
+    (case action
+      "refresh" (load-table-data!)
+      nil)))
+
+(defn backgound-connect! []
+  (let [port (bgx/connect!)]
+    (go-loop []
+      (when-let [msg (<! port)]
+        (handle-message! msg)
+        (recur)))))
+
+; --- lifecycle ---
 (defn fig-reload-hook []
   (log "fig-reload-hook")
   (unbind-handlers!)
@@ -125,8 +121,8 @@
   (bind-handlers!))
 
 (defn init! []
-  (log "DATAWORK: init")
-  (connect-to-background-page!)
+  (log "workspace: init")
   (install-table!)
   (load-table-data!)
-  (bind-handlers!))
+  (bind-handlers!)
+  (backgound-connect!))

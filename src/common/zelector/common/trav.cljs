@@ -8,7 +8,6 @@
             [jayq.core :as j]))
 
 ; --- range support ---
-
 (defn range->clj
   "Convert js/Range to cljs."
   [js-range]
@@ -51,7 +50,6 @@
          (range->js [[sc so] [sc so]]) ec eo))))
 
 ; --- traversal &c ---
-
 (defn node->leaves
   "Answer seq of leaves descendant from provided html node, ordered
   from left to right."
