@@ -11,6 +11,8 @@
 -- MOVE ON
 
 future
+-- when pushing combined range to buffer, collapse whitespace, convert p, br *c to newlines
+-- optimize ui tree w/ components for mark, over (over queries/refreshes on [client-x, client-y] or scroll forces)
 -- sticky buffer surviving refreshes and navigations
 -- include pseudo-element content in selections?
 -- download csv gets filename

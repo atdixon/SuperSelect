@@ -167,8 +167,6 @@
                                               (om/transact! this
                                                 `[(z/put {:mark/ch ~char})
                                                   (z/put {:mark/over ~range})]))))))))
-                   ; todo - instead of toString on combined, really need to strip long sequences of
-                   ; todo     whitespace, convert paragraph, br, etc. breaks into newlines etc. -- how?
                    :onClick (fn [e]
                               (if mark
                                 (om/transact! this `[(buffer/push {:value ~(trav/range->str combined)})
