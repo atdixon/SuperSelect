@@ -12,36 +12,45 @@
     width: 100%;
     min-width: 100%;
 
-    border: 5px solid orangered;
+    border: 5px solid rgb(0, 100, 255);
     margin: 0;
-    background-color: rgba(255, 0, 0, 0.05);
+    background-color: rgba(0, 0, 255, 0.001);
 }
 
 /* selection */
 .zelector-selection-base-rect {
+    pointer-events: none;
+    z-index: 2147483647;
     position: fixed;
 
-    border: solid pink;
+    border: 0 solid black;
+    background-color: #494949;
 }
 .zelector-selection-text-rect {
+    pointer-events: none;
+    z-index: 2147483647;
     position: fixed;
     user-select: none;
     overflow: hidden;
     white-space: nowrap;
 
-    background-color: white;
-    border: 1px dashed blue;
-    color: red;
+    background-color: #494949;
+    color: white;
 }
 .zelector-selection-mark-rect {
+    pointer-events: none;
+    z-index: 2147483647;
     position: fixed;
 
     border: solid black;
 }
 .zelector-selection-over-rect {
+    pointer-events: none;
+    z-index: 2147483647;
     position: fixed;
 
-    border: solid green;
+    border: solid black;
+    border-radius: 5px;
 }
 
 /* buffer */
@@ -141,7 +150,10 @@
 
 /* debug */
 #zelector-debug {
-    float: right;
+    z-index: 2147483647;
+    position: fixed;
+    top: 0;
+    right: 5px;
     overflow: auto;
 
     width: 350px;

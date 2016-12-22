@@ -17,10 +17,11 @@
                   (if range
                     (let [text (trav/range->str range) len (count text)]
                       (list
-                        (dom/div nil (dom/i nil "char = ") char)
-                        (dom/div nil
-                          (dom/i nil "word = ")
-                          (dom/span #js {:style #js {:fontSize 8
+                        (dom/div #js {:key "A"} (dom/i nil "char = ") char)
+                        (dom/div #js {:key "B"}
+                          (dom/i #js {:key "a"} "word = ")
+                          (dom/span #js {:key "b"
+                                         :style #js {:fontSize 8
                                                      :verticalAlign "sub"}}
                             (gstr/format "[%s.tns[%d],%d]"
                               (util/pretty-node (util/parent-node sc))
@@ -28,14 +29,15 @@
                               so))
                           (if (< len 50)
                             text (str (subs text 0 25) "..." (subs text (- len 25))))
-                          (dom/span #js {:style #js {:fontSize 8
+                          (dom/span #js {:key "c"
+                                         :style #js {:fontSize 8
                                                      :verticalAlign "sub"}}
                             (gstr/format "[%s.tns[%d],%d]"
                               (util/pretty-node (util/parent-node ec))
                               (util/node->sibling-index ec)
                               eo)))
                         (dom/div
-                          #js {:key "5z"
+                          #js {:key "C"
                                :className "zelector-debug-breakdown"}
                           (map-indexed
                             (fn [idx [[sc so] [ec eo] :as split]]
@@ -54,8 +56,8 @@
                                   (str (if (trav/valid-range? split) "valid" "invalid")))
                                 "]"))
                             (partition-range-fn range)))
-                        (dom/div #js {:key "5"
+                        (dom/div #js {:key "D"
                                       :onClick
-                                      (fn [] (om/transact! this `[(debug/toggle-freeze)]))}
+                                      (fn [] (om/transact! this `[(z/put {:flag/frozen ~(not frozen)})]))}
                           (if frozen "FROZEN" "ACTIVE"))))))]
           (layout (or range over)))))))

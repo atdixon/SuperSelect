@@ -8,7 +8,6 @@
             [chromex.ext.storage :as storage]
             [chromex.ext.browser-action :refer-macros [set-badge-text]]
             [cljs.core.async :refer [<! chan]]
-            [goog.object :as gobj]
             [goog.string :as gstring]
             [goog.string.format]
             [zelector.common.util :as util]

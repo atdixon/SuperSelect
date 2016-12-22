@@ -145,7 +145,78 @@
       (when enabled
         (dom/div
           nil
+          (comment debug-info {:captured/range combined
+                       :over over
+                       :char ch
+                       :frozen frozen
+                       :partition-range-fn partition-range*})
           (buffer-view {:buffer buffer :active active})
+          (when combined
+            (list
+              ; render full combined range as solid block (background)
+              (let [base-rects (trav/range->client-rects combined)
+                    border-width 0]
+                (map-indexed
+                  #(dom/div
+                    #js {:key %1
+                         :className "zelector-selection-base-rect"
+                         :style #js {:borderTopWidth border-width
+                                     :borderBottomWidth border-width
+                                     :top (- (.-top %2) border-width)
+                                     :left (- (.-left %2) border-width)
+                                     :width (inc (.-width %2))
+                                     :height (inc (.-height %2))}})
+                  base-rects))
+              ; render div and styled text for each char (or word or ...)
+              (for [[[sc _] [_ _] :as split] (partition-range* combined)
+                    :let [parent-node (util/parent-node sc)
+                          text-styles (util/elem->text-styles parent-node)
+                          border-width 0]] ; note: enable border-width to see split outlines
+                ; note: we map here over all client rects but split should have produced only one
+                ;  client rect
+                (map-indexed
+                  (fn [i rect]
+                    (dom/div
+                      #js {:key i
+                           :className "zelector-selection-text-rect"
+                           :style (clj->js
+                                    ; a couple of games to play here:
+                                    ; - we own "text-overflow" and "white-space" in our css
+                                    ;  - we translate "text-align" to "text-align-last" since
+                                    ;    we are always guaranteed to be rendering single-line rects
+                                    (merge (dissoc text-styles :textOverflow :whiteSpace :textAlign)
+                                      {:textAlignLast (:textAlign text-styles)
+                                       :borderWidth border-width
+                                       :top (- (.-top rect) border-width)
+                                       :left (- (.-left rect) border-width)
+                                       :width (inc (.-width rect))
+                                       :height (inc (.-height rect))}))}
+                      (trav/range->str split)))
+                  (trav/range->client-rects split)))))
+          (when mark
+            (map-indexed
+              #(let [border-width 0]
+                (dom/div
+                  #js {:key %1
+                       :className "zelector-selection-mark-rect"
+                       :style #js {:borderWidth border-width
+                                   :top (- (.-top %2) border-width)
+                                   :left (- (.-left %2) border-width)
+                                   :width (inc (.-width %2))
+                                   :height (inc (.-height %2))}}))
+              (trav/range->client-rects mark)))
+          (when over
+            (map-indexed
+              #(let [border-width 1]
+                (dom/div
+                  #js {:key %1
+                       :className "zelector-selection-over-rect"
+                       :style #js {:borderWidth border-width
+                                   :top (- (.-top %2) border-width)
+                                   :left (- (.-left %2) border-width)
+                                   :width (inc (.-width %2))
+                                   :height (inc (.-height %2))}}))
+              (trav/range->client-rects over)))
           (when active
             (dom/div
               #js {:id "zelector-glass"
@@ -173,75 +244,7 @@
                               (if mark
                                 (om/transact! this `[(buffer/push {:value ~(trav/range->str combined)})
                                                      (z/put {:mark/mark nil})])
-                                (om/transact! this `[(z/put {:mark/mark ~over})])))}
-              (when combined
-                (list
-                  ; render full combined range as solid block (background)
-                  (map-indexed
-                    #(let [border-width 2]
-                      (dom/div
-                        #js {:key %1
-                             :className "zelector-selection-base-rect"
-                             :style #js {:borderWidth border-width
-                                         :top (- (.-top %2) border-width)
-                                         :left (- (.-left %2) border-width)
-                                         :width (inc (.-width %2))
-                                         :height (inc (.-height %2))}}))
-                    (trav/range->client-rects combined))
-                  ; render div and styled text for each char (or word or ...)
-                  (for [[[sc _] [_ _] :as split] (partition-range* combined)
-                        :let [parent-node (util/parent-node sc)
-                              text-styles (util/elem->text-styles parent-node)]]
-                    ; note: we map here over all client rects but split should have produced only one client rect
-                    (map-indexed
-                      (fn [i rect]
-                        (let [border-width 0] ; note: enable border-width to see range outlines
-                          (dom/div
-                            #js {:key i
-                                 :className "zelector-selection-text-rect"
-                                 :style (clj->js
-                                          ; a couple of games to play here:
-                                          ; - we own "text-overflow" and "white-space" in our css
-                                          ;  - we translate "text-align" to "text-align-last" since
-                                          ;    we are always guaranteed to be rendering single-line rects
-                                          (merge (dissoc text-styles :textOverflow :whiteSpace :textAlign)
-                                            {:textAlignLast (:textAlign text-styles)
-                                             :borderWidth border-width
-                                             :top (- (.-top rect) border-width)
-                                             :left (- (.-left rect) border-width)
-                                             :width (inc (.-width rect))
-                                             :height (inc (.-height rect))}))}
-                            (trav/range->str split))))
-                      (trav/range->client-rects split)))))
-              (when mark
-                (map-indexed
-                  #(let [border-width 2]
-                    (dom/div
-                      #js {:key %1
-                           :className "zelector-selection-mark-rect"
-                           :style #js {:borderWidth border-width
-                                       :top (- (.-top %2) border-width)
-                                       :left (- (.-left %2) border-width)
-                                       :width (inc (.-width %2))
-                                       :height (inc (.-height %2))}}))
-                  (trav/range->client-rects mark)))
-              (when over
-                (map-indexed
-                  #(let [border-width 2]
-                    (dom/div
-                      #js {:key %1
-                           :className "zelector-selection-over-rect"
-                           :style #js {:borderWidth border-width
-                                       :top (- (.-top %2) border-width)
-                                       :left (- (.-left %2) border-width)
-                                       :width (inc (.-width %2))
-                                       :height (inc (.-height %2))}}))
-                  (trav/range->client-rects over)))
-              (comment debug-info {:captured/range combined
-                           :over over
-                           :char ch
-                           :frozen frozen
-                           :partition-range-fn partition-range*}))))))))
+                                (om/transact! this `[(z/put {:mark/mark ~over})])))})))))))
 
 ; --- remote ---
 (defn- send*
