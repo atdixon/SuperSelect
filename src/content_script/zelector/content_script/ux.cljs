@@ -6,14 +6,13 @@
             [om.dom :as dom]
             [goog.object :as gobj]
             [goog.dom :as gdom]
-            [goog.string :as gstr]
-            [goog.string.format]
             [cljsjs.jquery]
             [jayq.core :as j]
-            [zelector.common.bgx :as bgx]
-            [zelector.common.trav :as trav]
             [zelector.common.util :as util]
-            [zelector.content-script.parser :as parser]))
+            [zelector.common.trav :as trav]
+            [zelector.common.bgx :as bgx]
+            [zelector.content-script.parser :as parser]
+            [zelector.content-script.debug-panel :as debug]))
 
 ; --- util ---
 (defn curr-window-size []
@@ -26,12 +25,9 @@
     (clj->js (merge props {:children children}))))
 
 ; --- actions ---
-; todo orchestrate w/ :remote?
-(defn save-buffer! []
-  (let [st @state
-        {:keys [buff]} st
-        as-record (map :content buff)]
-    (comment bgx/post-record! as-record)))
+(defn save-buffer! [buffer]
+  (let [as-record (map :content buffer)]
+    (bgx/post-message! {:action "record" :params {:record as-record}})))
 
 ; --- ui functions ---
 (defn single-rect? [range]
@@ -62,70 +58,6 @@
   (partition-range* :reset!))
 
 ; --- ui components ---
-(defui DebugInfo
-  Object
-  (render [this]
-    (let [{:keys [captured/range over char freeze]} (om/props this)]
-      (dom/div #js {:id      "zelector-debug"
-                    :onClick #(.stopPropagation %)}
-        (letfn [(fmt [[[sc so] [ec eo] :as range]]
-                  (if range
-                    (let [text (trav/range->str range) len (count text)]
-                      (list
-                        (str "[" char "]")
-                        (dom/br #js {:key "1a"})
-                        "---"
-                        (dom/br #js {:key "1b"})
-                        (gstr/format
-                          "%s[%s]...%s[%s]"
-                          (util/pretty-node (util/parent-node sc))
-                          (util/node->sibling-index sc)
-                          (util/pretty-node (util/parent-node ec))
-                          (util/node->sibling-index ec))
-                        (dom/br #js {:key "2a"})
-                        "---"
-                        (dom/br #js {:key "2b"})
-                        (dom/span #js {:key   "3a"
-                                       :style #js {:fontSize 8
-                                                   :verticalAlign "sub"}} so)
-                        (if (< len 50)
-                          text (str (subs text 0 25) "..." (subs text (- len 25))))
-                        (dom/span #js {:key   "3b"
-                                       :style #js {:fontSize 8
-                                                   :verticalAlign "sub"}} eo)
-                        (dom/br #js {:key "4a"})
-                        "---"
-                        (dom/br #js {:key "4b"})
-                        (dom/div
-                          #js {:key "5z"
-                               :className "zelector-debug-breakdown"}
-                          (map-indexed
-                            (fn [idx [[sc so] [ec eo] :as split]]
-                              (list
-                                "["
-                                (dom/span #js {:key (str idx "a")
-                                               :style #js {:fontSize 8
-                                                           :verticalAlign "sub"}} so)
-                                (trav/range->str split)
-                                (dom/span #js {:key (str idx "b")
-                                               :style #js {:fontSize 8
-                                                           :verticalAlign "sub"}} eo)
-                                (dom/span #js {:key (str idx "c")
-                                               :style #js {:fontSize 8
-                                                           :verticalAlign "super"}}
-                                          (str (trav/valid-range? split)))
-                                "]"))
-                            (partition-range* range)))
-                        (dom/br #js {:key "5a"})
-                        "---"
-                        (dom/br #js {:key "5b"})
-                        (dom/div #js {:key "5"
-                                      :onClick
-                                      (fn [] (om/transact! this `[(debug/toggle-freeze)]))}
-                          (if freeze "FROZEN" "ACTIVE"))))))]
-          (fmt (or range over)))))))
-(def debug-info (om/factory DebugInfo))
-
 (defui BufferItem
   Object
   (render [this]
@@ -145,7 +77,7 @@
   Object
   (render [this]
     (let [{:keys [buffer active]} (om/props this)
-          clear-buffer! #(om/transact! this `[(buffer/clear) :buff])]
+          clear-buffer! #(om/transact! this `[(buffer/clear)])]
       (dom/div
         #js {:id "zelector-buffer"}
         (if-not (empty? buffer)
@@ -163,20 +95,24 @@
                  (dom/div #js {:style #js {}}
                           (dom/b nil "Zelector") ": "
                           (dom/span #js {:style #js {:cursor "pointer"}
-                                         :onClick #(om/transact! this `[(z/update-durable {:z/active ~(not active)})])}
+                                         :onClick #(om/transact! this
+                                                    `[(durable/update {:z/active ~(not active)})])}
                                     (if active "active" "inactive")))
                  (dom/div #js {:style #js {:float "right"}}
                            (dom/a #js {:href "#" :title "Clear this buffer"
                                        :onClick #(clear-buffer!)} "clear")
                            (dom/a #js {:href "#" :title "Save this buffer to the backend"
                                        :onClick (fn [event]
-                                                  (save-buffer!)
+                                                  (save-buffer! buffer)
                                                   (clear-buffer!))} "save")))))))
-(def buffer (om/factory BufferView))
+(def buffer-view (om/factory BufferView))
+
+(def debug-info (om/factory debug/DebugInfo))
 
 (defui Zelector
   static om/IQuery
-  (query [this] '[:over :mark :ch :buff :freeze :debug-active {:durable [:enabled :active]}])
+  (query [this] '[:mark/ch :mark/over :mark/mark :flag/frozen
+                  :buffer {:durable [:z/enabled :z/active]}])
   Object
   (componentDidMount [this]
     (letfn [(bind [target jq-event-type handler]
@@ -185,19 +121,18 @@
       (bind js/window "resize.zelector scroll.zelector" #(.forceUpdate this))
       (bind js/document "keydown.zelector"
             (fn [event]
-              (let [{:keys [active]} (om/props this)
+              (let [{{:keys [:z/active]} :durable} (om/props this)
                     inp? (util/input-node? (.-target event))
                     key? (and (= (.toLowerCase (.-key event)) "z") (.-shiftKey event))]
-                (if key? (log "k a i" active inp?))
                 (when (and key? (or active (not inp?)))
                   (when active
-                    (om/transact! this `[(mark/set {:value nil})]))
-                  (om/transact! this '[(active/toggle)])))))))
+                    (om/transact! this '[(z/put {:mark/mark nil})]))
+                  (om/transact! this `[(durable/update {:z/active ~(not active)})])))))))
   (componentWillUnmount [this]
     (-> js/window j/$ (.unbind ".zelector"))
     (-> js/document j/$ (.unbind ".zelector")))
   (render [this]
-    (let [{:keys [over mark ch buff freeze debug-active]} (om/props this)
+    (let [{:keys [:mark/ch :mark/over :mark/mark :flag/frozen :buffer]} (om/props this)
           {{:keys [:z/enabled :z/active]} :durable} (om/props this)
           combined (if (and mark over) (combine-ranges* mark over))
           [window-width window-height] (curr-window-size)
@@ -205,7 +140,7 @@
       (when enabled
         (dom/div
           nil
-          (buffer {:buffer buff :active active})
+          (buffer-view {:buffer buffer :active active})
           (when active
             (dom/div
               #js {:id "zelector-glass"
@@ -215,7 +150,7 @@
                         :width (- window-width glass-border-width glass-border-width)
                         :height (- window-height glass-border-width glass-border-width)}
                    :onMouseMove (fn [event]
-                                  (if-not freeze
+                                  (if-not frozen
                                     (let [glass (.-currentTarget event)
                                           client-x (.-clientX event)
                                           client-y (.-clientY event)
@@ -231,15 +166,15 @@
                                           (when-not (or (nil? char) (util/whitespace-char? char))
                                             (let [range (trav/position->word-range [container index])]
                                               (om/transact! this
-                                                `[(ch/set {:value ~char})
-                                                  (over/set {:value ~range})]))))))))
+                                                `[(z/put {:mark/ch ~char})
+                                                  (z/put {:mark/over ~range})]))))))))
                    ; todo - instead of toString on combined, really need to strip long sequences of
                    ; todo      whitespace, convert paragraph, br, etc. breaks into newlines etc. -- how?
                    :onClick (fn [event]
                               (if mark
                                 (om/transact! this `[(buffer/push {:value ~(trav/range->str combined)})
-                                                     (mark/set {:value nil})])
-                                (om/transact! this `[(mark/set {:value ~over})])))}
+                                                     (z/put {:mark/mark nil})])
+                                (om/transact! this `[(z/put {:mark/mark ~over})])))}
               (when combined
                 (list
                   ; render full combined range as solid block (background)
@@ -303,8 +238,11 @@
                                        :width (inc (.-width %2))
                                        :height (inc (.-height %2))}}))
                   (trav/range->client-rects over)))
-              (when debug-active
-                (debug-info {:captured/range combined :over over :char ch :freeze freeze})))))))))
+              (debug-info {:captured/range combined
+                                   :over over
+                                   :char ch
+                                   :frozen frozen
+                                   :partition-range-fn partition-range*}))))))))
 
 ; --- remote ---
 (defn- remote
@@ -326,12 +264,11 @@
          :over nil
          :mark nil
          :freeze nil
-         :active false
          :debug-active true
-         :buff []
+         :buffer []
          :flags {:debugged nil
                  :frozen nil}
-         :durable {:z/enabled true
+         :durable {;:z/enabled true
                    ;:z/active false
                    } ; until proven otherwise.
          }))
@@ -351,7 +288,6 @@
 ;       our application/reconciler :durable state state.
 (defn handle-message! [msg]
   (let [{:keys [action params]} (util/js->clj* msg)]
-    (log "merge:" (print-str {:durable params}))
     (case action
       "config" (om.next/merge! reconciler {:durable params})
       nil)))

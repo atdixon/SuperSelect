@@ -99,10 +99,10 @@
 ;   {action: "refresh",
 ;    params: {resource: ["db"]}}
 (defn handle-message! [msg]
-  (log "handling" msg)
   (let [{:keys [action params]} (util/js->clj* msg)]
     (case action
-      "refresh" (load-table-data!)
+      "refresh" (do (reinstall-table!)
+                    (load-table-data!)) ; poorman's, for now.
       nil)))
 
 (defn backgound-connect! []
