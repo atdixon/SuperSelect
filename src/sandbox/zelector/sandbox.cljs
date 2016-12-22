@@ -10,5 +10,5 @@
 
 (defonce setup
   (do
-    (log "initial setup")
+    (log "sandbox: setup")
     (ux/init-basic!)))

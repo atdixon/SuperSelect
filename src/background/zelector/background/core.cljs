@@ -19,7 +19,6 @@
   "Get value for a key/s (a vector of keywords), answer
   channel of result."
   [keys]
-  (log "getting" (clj->js keys))
   (let [storage (storage/get-local)]
     (proto/get storage (clj->js keys))))
 
@@ -36,7 +35,6 @@
     (swap! clients remove-item port)))
 
 (defn message-clients*! [msg]
-  (log "message-clients*!" msg)
   (doseq [client @clients]
     (post-message! client (clj->js msg))))
 
@@ -71,7 +69,6 @@
 (defn run-client-loop! [client]
   (go-loop []
     (when-let [msg (<! client)]
-      (log "bg: got client message:" (print-str msg) "from" (get-sender client))
       (let [{:keys [action params]} (util/js->clj* msg)]
         (case action
           "record" (do
@@ -91,7 +88,6 @@
 
 ; --- event loop ---
 (defn process-event [event-num event]
-  (log (gstring/format "BACKGROUND: got chrome event (%05d)" event-num) event)
   (let [[event-id args] event]
     (case event-id
       ::runtime/on-connect (apply handle-client-connection! args)

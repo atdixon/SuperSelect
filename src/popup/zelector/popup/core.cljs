@@ -38,7 +38,6 @@
 (defmethod read :default
   [{:keys [state]} key _]
   (let [st @state]
-    (log "reading ->" (get st key))
     {:value (get st key)
      :remote true}))
 
@@ -53,10 +52,8 @@
   (let [ast (-> remote om/query->ast :children first)]
     (case (:type ast)
       :prop (do
-              (log "post:" {:action "config"})
               (bgx/post-message! {:action "config"}))
       :call (when (= (:key ast) 'z/update)
-              (log "post:" {:action "config" :params (:params ast)})
               (bgx/post-message! {:action "config"
                                   :params (:params ast)})))))
 
@@ -67,7 +64,6 @@
   Object
   (render [this]
     (let [{:keys [z/enabled]} (om/props this)]
-      (log "rendering" enabled)
       (dom/div
         #js {}
         (dom/h2 #js {} "Zelector")

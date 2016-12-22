@@ -251,7 +251,6 @@
   props). Assume mutate is update with single params map."
   [{:keys [remote]} cb]
   (let [ast (-> remote om/query->ast :children first)]
-    (log "remote[" (:type ast) "]" (:params ast))
     (case (:type ast)
       :call (bgx/post-message! {:action "config"
                                 :params (:params ast)})
