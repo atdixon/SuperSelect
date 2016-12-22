@@ -12,125 +12,18 @@
             [jayq.core :as j]
             [zelector.common.bgx :as bgx]
             [zelector.common.trav :as trav]
-            [zelector.common.util :as util]))
+            [zelector.common.util :as util]
+            [zelector.content-script.parser :as parser]))
 
 ; --- util ---
 (defn curr-window-size []
   (let [$win (j/$ js/window)]
     [(.width $win) (.height $win)]))
 
-(defn vec-remove [coll pos]
-  (vec (concat (subvec coll 0 pos) (subvec coll (inc pos)))))
-
 (defn css-transition-group [props children]
   (js/React.createElement
     js/React.addons.CSSTransitionGroup
     (clj->js (merge props {:children children}))))
-
-; --- state ---
-(defonce
-  state
-  (atom {:ch nil
-         :over nil
-         :mark nil
-         :freeze nil
-         :active false
-         :debug-active true
-         :buff []
-         :flags {:debugged nil
-                 :frozen nil}
-         ; configure durables w/ defaults until proven otherwise
-         :durable {:z/enabled true
-                   :z/active false}}))
-
-(defmulti read om/dispatch)
-(defmulti mutate om/dispatch)
-
-(defmethod read :default
-  [{:keys [state] :as env} key params]
-  (let [st @state]
-    {:value (key st)}))
-
-; todo
-(defmethod mutate 'z/set-flag
-  [{:keys [state]} _ params]
-  {:action
-   (fn []
-     (swap! state update :flags merge params))})
-
-(defmethod mutate 'z/update-durable
-  [{:keys [state]} _ params]
-  {:remote true})
-
-; todo plugin enabled (also how do updates to storage get pushed out to content scripts etc)
-; todo simplify mutates to 'z/set
-(defmethod mutate 'over/set
-  [{:keys [state]} _ {:keys [value]}]
-  {:action
-   (fn []
-     (swap! state assoc :over value))})
-
-(defmethod mutate 'mark/set
-  [{:keys [state]} _ {:keys [value]}]
-  {:action
-   (fn []
-     (swap! state assoc :mark value))})
-
-(defmethod mutate 'ch/set
-  [{:keys [state]} _ {:keys [value]}]
-  {:action
-   (fn []
-     (swap! state assoc :ch value))})
-
-(defmethod mutate 'buffer/push
-  [{:keys [state]} _ {:keys [value]}]
-  {:action
-   (fn []
-     (swap! state update :buff conj {:id (random-uuid) :content value}))})
-
-(defmethod mutate 'buffer/remove
-  [{:keys [state]} _ {:keys [index]}]
-  {:action
-   (fn []
-     (swap! state update :buff vec-remove index))})
-
-(defmethod mutate 'buffer/clear
-  [{:keys [state]} _ _]
-  {:action
-   (fn []
-     (swap! state assoc :buff (vector)))})
-
-(defmethod mutate 'debug/toggle-freeze
-  [{:keys [state]} _ _]
-  {:action
-   (fn []
-     (swap! state update :freeze #(if (nil? %) true nil)))})
-
-(defmethod mutate 'active/set
-  [{:keys [state]} _ {:keys [value]}]
-  {:action
-   (fn []
-     (swap! state assoc :active value))})
-
-(defmethod mutate 'active/toggle
-  [{:keys [state]} _ _]
-  {:action
-   (fn []
-     (swap! state update :active not))})
-
-; --- remote ---
-(defn- remote
-  "Handle remote/send."
-  [{:keys [remote]} cb]
-  (let [ast (-> remote om/query->ast :children first)]
-    (case (:type ast)
-      :prop (do
-              (log "post:" {:action "config"})
-              (bgx/post-message! {:action "config"}))
-      :call (when (= (:key ast) 'z/update-durable)
-              (log "post:" {:action "config" :params (:params ast)})
-              (bgx/post-message! {:action "config"
-                                  :params (:params ast)})))))
 
 ; --- actions ---
 ; todo orchestrate w/ :remote?
@@ -270,7 +163,7 @@
                  (dom/div #js {:style #js {}}
                           (dom/b nil "Zelector") ": "
                           (dom/span #js {:style #js {:cursor "pointer"}
-                                         :onClick #(om/transact! this '[(active/toggle)])}
+                                         :onClick #(om/transact! this `[(z/update-durable {:z/active ~(not active)})])}
                                     (if active "active" "inactive")))
                  (dom/div #js {:style #js {:float "right"}}
                            (dom/a #js {:href "#" :title "Clear this buffer"
@@ -283,7 +176,7 @@
 
 (defui Zelector
   static om/IQuery
-  (query [this] '[:over :mark :ch :buff :freeze :active :debug-active :durable])
+  (query [this] '[:over :mark :ch :buff :freeze :debug-active {:durable [:enabled :active]}])
   Object
   (componentDidMount [this]
     (letfn [(bind [target jq-event-type handler]
@@ -304,12 +197,11 @@
     (-> js/window j/$ (.unbind ".zelector"))
     (-> js/document j/$ (.unbind ".zelector")))
   (render [this]
-    (let [{:keys [over mark ch buff freeze active debug-active]} (om/props this)
-          {{:keys [:z/enabled]} :durable} (om/props this)
+    (let [{:keys [over mark ch buff freeze debug-active]} (om/props this)
+          {{:keys [:z/enabled :z/active]} :durable} (om/props this)
           combined (if (and mark over) (combine-ranges* mark over))
           [window-width window-height] (curr-window-size)
           glass-border-width 5]
-      (log "enabled = " enabled)
       (when enabled
         (dom/div
           nil
@@ -414,24 +306,52 @@
               (when debug-active
                 (debug-info {:captured/range combined :over over :char ch :freeze freeze})))))))))
 
+; --- remote ---
+(defn- remote
+  "Handle remote/send. Assume singleton vector of read/mutate queries.
+  Assume reads are for single/flat props (i.e., a :join with single/flat
+  props). Assume mutate is update with single params map."
+  [{:keys [remote]} cb]
+  (let [ast (-> remote om/query->ast :children first)]
+    (log "remote[" (:type ast) "]" (:params ast))
+    (case (:type ast)
+      :call (bgx/post-message! {:action "config"
+                                :params (:params ast)})
+      :join (bgx/post-message! {:action "config"}))))
+
+; --- state ---
+(defonce
+  state
+  (atom {:ch nil
+         :over nil
+         :mark nil
+         :freeze nil
+         :active false
+         :debug-active true
+         :buff []
+         :flags {:debugged nil
+                 :frozen nil}
+         :durable {:z/enabled true
+                   ;:z/active false
+                   } ; until proven otherwise.
+         }))
+
 (def reconciler
   (om/reconciler
     {:state  state
-     :parser (om/parser {:read read :mutate mutate})}))
-
-(defn install-glass-mount! []
-  (-> (j/$ "<div id=\"zelector-glass-mount\">")
-    (.appendTo "body")
-    (aget 0)))
+     :parser (om/parser {:read parser/read :mutate parser/mutate})
+     :send remote}))
 
 ; --- background ---
 ; handle messages like, e.g.,
 ;   {action: "config",
 ;    params: {z/enabled: true,
 ;             z/active: true}}
+; note: any "config" actions we'll merge the data directly into
+;       our application/reconciler :durable state state.
 (defn handle-message! [msg]
-  (log "handling" msg)
   (let [{:keys [action params]} (util/js->clj* msg)]
+    (log "merge:" (print-str {:durable params}))
     (case action
       "config" (om.next/merge! reconciler {:durable params})
       nil)))
@@ -444,9 +364,14 @@
         (recur)))))
 
 ; --- lifecycle ---
+(defn install-glass-mount! []
+  (-> (j/$ "<div id=\"zelector-glass-mount\">")
+    (.appendTo "body")
+    (aget 0)))
+
 (defn init! []
-  (om/add-root! reconciler Zelector (install-glass-mount!))
-  (backgound-connect!))
+  (backgound-connect!)
+  (om/add-root! reconciler Zelector (install-glass-mount!)))
 
 ; --- for sandbox ---
 (defn init-basic!

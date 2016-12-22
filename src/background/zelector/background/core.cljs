@@ -40,6 +40,14 @@
   (doseq [client @clients]
     (post-message! client (clj->js msg))))
 
+(defn broadcast-stored-keys!
+  "Broadcast clients with all stored keys."
+  []
+  (go
+    (let [[[items] err] (<! (get-stored-keys [:z/enabled :z/active]))]
+      (when-not err
+        (message-clients*! {:action "config" :params items})))))
+
 ; NOTE: Our background "API" supports, e.g.:
 ;
 ;   {action: "record",
@@ -63,7 +71,7 @@
 (defn run-client-loop! [client]
   (go-loop []
     (when-let [msg (<! client)]
-      (log "BACKGROUND: got client message:" msg "from" (get-sender client))
+      (log "bg: got client message:" (print-str msg) "from" (get-sender client))
       (let [{:keys [action params]} (util/js->clj* msg)]
         (case action
           "record" (do
@@ -71,11 +79,7 @@
                      (message-clients*! {:action "refresh"
                                          :resource ["db"]}))
           "config" (if (empty? params)
-                     (go
-                       (let [[[items] err] (<! (get-stored-keys [:z/enabled :z/active]))]
-                         (log "got" items)
-                         (when-not err
-                           (message-clients*! {:action "config" :params items}))))
+                     (broadcast-stored-keys!)
                      (set-stored-keys! params))))
       (recur))
     (remove-client! client)))
@@ -91,11 +95,7 @@
   (let [[event-id args] event]
     (case event-id
       ::runtime/on-connect (apply handle-client-connection! args)
-      ::storage/on-changed (let [changes (util/js->clj* (first args))]
-                             (message-clients*!
-                               {:action "config"
-                                :params (into {}
-                                          (map (fn [[k v]] [k (:newValue v)]) changes))}))
+      ::storage/on-changed (broadcast-stored-keys!) ; broadcast all, making client's merge! reconcilation more direct for now.
       nil)))
 
 (defn run-event-loop! [ch]

@@ -93,8 +93,9 @@
 ; handle messages like, e.g.,
 ;   {action: "config",
 ;    params: {z/enabled: true}}
+; note: any "config" actions we'll merge the data directly into
+;       our application/reconciler state.
 (defn handle-message! [msg]
-  (log "handling" msg)
   (let [{:keys [action params]} (util/js->clj* msg)]
     (case action
       "config" (om.next/merge! reconciler params)

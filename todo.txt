@@ -51,5 +51,6 @@ ideas
 -- user-defined table schemas
 -- optionally convert smart quotes elipses etc?
 
-om/next bugs?
--- if state.flag = nil, component *not* rendered but subsequent merge will not yield initial component render
+om/next?
+-- bug? if state.flag = nil, component *not* rendered but subsequent merge will not yield initial component render
+-- how does om/next decide when/to call remotes
