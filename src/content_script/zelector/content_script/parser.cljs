@@ -6,10 +6,7 @@
   (vec (concat (subvec coll 0 pos) (subvec coll (inc pos)))))
 
 ; --- state structure ---
-;{:marks {:ch ch :over nil :mark nil}
-; :flags {:debugged nil
-;         :frozen nil}
-; :mark/ch nil
+;{:mark/ch nil
 ; :mark/over nil
 ; :mark/mark nil
 ; :flag/frozen nil

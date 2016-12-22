@@ -15,10 +15,6 @@
             [zelector.content-script.debug-panel :as debug]))
 
 ; --- util ---
-(defn- curr-window-size []
-  (let [$win (j/$ js/window)]
-    [(.width $win) (.height $win)]))
-
 (defn- css-transition-group [props children]
   (js/React.createElement
     js/React.addons.CSSTransitionGroup
@@ -124,7 +120,7 @@
     (letfn [(bind [target jq-event-type handler]
               (.bind (j/$ target) jq-event-type handler))]
       (bind js/window "resize.zelector" #(reset-memoizations!))
-      (bind js/window "resize.zelector scroll.zelector" #(.forceUpdate this))
+      (bind js/window "scroll.zelector" #(.forceUpdate this))
       (bind js/document "keydown.zelector"
             (fn [e]
               (let [{{:keys [:z/active]} :durable} (om/props this)
@@ -143,9 +139,7 @@
   (render [this]
     (let [{:keys [:mark/ch :mark/over :mark/mark :flag/frozen :buffer]} (om/props this)
           {{:keys [:z/enabled :z/active] :or {enabled false active false}} :durable} (om/props this)
-          combined (if (and mark over) (combine-ranges* mark over))
-          [window-width window-height] (curr-window-size)
-          glass-border-width 5]
+          combined (if (and mark over) (combine-ranges* mark over))]
       (when enabled
         (dom/div
           nil
@@ -153,11 +147,7 @@
           (when active
             (dom/div
               #js {:id "zelector-glass"
-                   :style
-                   #js {:top 0
-                        :left 0
-                        :width (- window-width glass-border-width glass-border-width)
-                        :height (- window-height glass-border-width glass-border-width)}
+                   :style #js {}
                    :onMouseMove (fn [e]
                                   (if-not frozen
                                     (let [glass (.-currentTarget e)

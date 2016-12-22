@@ -1,10 +1,20 @@
 #zelector-glass {
     pointer-events: auto;
     cursor: default;
+
     z-index: 2147483646;
     position: fixed;
-    background-color: rgba(255, 0, 0, 0.05);
+    box-sizing: border-box;
+    top: 0;
+    left: 0;
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+    min-width: 100%;
+
     border: 5px solid orangered;
+    margin: 0;
+    background-color: rgba(255, 0, 0, 0.05);
 }
 
 /* selection */
