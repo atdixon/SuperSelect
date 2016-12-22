@@ -1,5 +1,6 @@
--- prod build and initial test
--- handling port disconnects (e.g. bg cxns clients); make background persistent = false??
+-- stylin'
+-- handling port disconnects (e.g. bg cxns clients)
+    -- evaporate content script on port disconnect??
 -- compiler warnings (see pocket)
 -- test w/ initial install (no local storage, no indexedb data)
 -- simple selection v. (slower?) rect rendering
@@ -12,7 +13,6 @@
 
 future
 -- when pushing combined range to buffer, collapse whitespace, convert p, br *c to newlines
--- optimize ui tree w/ components for mark, over (over queries/refreshes on [client-x, client-y] or scroll forces)
 -- sticky buffer surviving refreshes and navigations
 -- include pseudo-element content in selections?
 -- download csv gets filename
@@ -27,16 +27,20 @@ future
 -- better ux animations (e.g. buffer adds/removes animates badly)
 -- multilang testing
 
+code
+-- fully replace custom externs w/ oops
+-- move debugger to root level, have it query root props, dynamically render
+    -- does this make it easier to only add it in unpacked modes
+-- optimize ui tree w/ components for mark, over (over queries/refreshes on [client-x, client-y] or scroll forces)
+    -- org om components for minimal odm diffs/updates
+
 other
 -- O/n of traversals
--- org om components for minimal odm diffs/updates
 -- reconnect to bg page after extension refresh/update!
 -- save-buffer! and other buffer ops handled via remotes
 -- when to use #shadow-dom
 -- lose jquery, use goog.dom,*; document.querySelector(), etc.
 -- lose dexie
--- core.async + pubsub to dispatch window resize/scroll/etc
--- core.async for click etc events?
 -- react devtools?
 -- unit testing?
 
@@ -47,5 +51,6 @@ ideas
 -- optionally convert smart quotes elipses etc?
 
 om/next?
--- bug? if state.flag = nil, component *not* rendered but subsequent merge will not yield initial component render
+-- bug? if state.flag = nil, component *not* rendered but
+    subsequent merge will not yield initial component render
 -- how does om/next decide when/to call remotes

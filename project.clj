@@ -1,4 +1,4 @@
-(defproject zelector "0.1.0-SNAPSHOT"
+(defproject zelector "0.1.0"
   :description "Zelector. Select the Web."
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/clojurescript "1.9.293"]
@@ -7,6 +7,7 @@
                  [cljsjs/react-with-addons "15.3.1-0"]
                  [cljsjs/jquery "2.2.4-0"]
                  [jayq "2.5.4"]
+                 [binaryage/oops "0.5.2"]
                  [binaryage/chromex "0.5.1"]
                  [binaryage/devtools "0.8.2"]
                  [cljsjs/papaparse "4.1.1-1"]
@@ -17,8 +18,7 @@
 
   :plugins [[lein-cljsbuild "1.1.4"]
             [lein-figwheel "0.5.8"]
-            [lein-environ "1.1.0"]
-            [lein-shell "0.5.0"]]
+            [lein-environ "1.1.0"]]
 
   :source-paths ["src/common"
                  "src/background"
@@ -28,6 +28,7 @@
                  "src/sandbox"]
 
   :clean-targets ^{:protect false} ["target"
+                                    "releases"
                                     "resources/unpacked/compiled"
                                     "resources/release/compiled"]
 
@@ -143,7 +144,8 @@
                              :foreign-libs [{:file "foreign-lib/dexie/dexie.min.js"
                                              :provides ["dexie"]}
                                             {:file "foreign-lib/handsontable/handsontable.full.min.js"
-                                             :provides ["handsontable"]}]}}
+                                             :provides ["handsontable"]}]
+                             :language-in :ecmascript5 :language-out :ecmascript5}}
                  {:id "popup"
                   :source-paths ["src/popup" "src/common"]
                   :compiler {:output-to "resources/release/compiled/popup.js"
@@ -157,7 +159,8 @@
                              :foreign-libs [{:file "foreign-lib/dexie/dexie.min.js"
                                              :provides ["dexie"]}
                                             {:file "foreign-lib/handsontable/handsontable.full.min.js"
-                                             :provides ["handsontable"]}]}}
+                                             :provides ["handsontable"]}]
+                             :language-in :ecmascript5 :language-out :ecmascript5}}
                  {:id "workspace"
                   :source-paths ["src/workspace" "src/common"]
                   :compiler {:output-to "resources/release/compiled/workspace.js"
@@ -171,7 +174,8 @@
                              :foreign-libs [{:file "foreign-lib/dexie/dexie.min.js"
                                              :provides ["dexie"]}
                                             {:file "foreign-lib/handsontable/handsontable.full.min.js"
-                                             :provides ["handsontable"]}]}}
+                                             :provides ["handsontable"]}]
+                             :language-in :ecmascript5 :language-out :ecmascript5}}
                  {:id "content-script"
                   :source-paths ["src/content_script" "src/common"]
                   :compiler {:output-to "resources/release/compiled/content-script.js"
@@ -185,14 +189,13 @@
                              :foreign-libs [{:file "foreign-lib/dexie/dexie.min.js"
                                              :provides ["dexie"]}
                                             {:file "foreign-lib/handsontable/handsontable.full.min.js"
-                                             :provides ["handsontable"]}]}}]}}]}
+                                             :provides ["handsontable"]}]
+                             :language-in :ecmascript5 :language-out :ecmascript5}}]}}]}
 
-  :aliases {"dev-build"   ["with-profile" "+unpacked,+unpacked-content-script" "cljsbuild" "once"]
+  :aliases {"dev-build" ["with-profile" "+unpacked,+unpacked-content-script" "cljsbuild" "once"]
             "content-dev" ["with-profile" "+unpacked-content-script" "cljsbuild" "auto" "content-script"]
-            "fig-dev"     ["with-profile" "+unpacked,+figwheel" "figwheel" "background" "popup" "workspace"]
-            ;"sandbox"     ["with-profile" "+sandbox" "cljsbuild" "auto" "sandbox"]
-            "sandbox"     ["with-profile" "+sandbox,+figwheel" "figwheel" "sandbox"]
-            "release"     ["with-profile" "+release" "do"
-                           ["clean"]
-                           ["cljsbuild" "once" "background" "popup" "workspace" "content-script"]]
-            "package"     ["shell" "scripts/package.sh"]})
+            "fig-dev" ["with-profile" "+unpacked,+figwheel" "figwheel" "background" "popup" "workspace"]
+            "sandbox" ["with-profile" "+sandbox,+figwheel" "figwheel" "sandbox"]
+            "release" ["with-profile" "+release" "do"
+                       ["clean"]
+                       ["cljsbuild" "once" "background" "popup" "workspace" "content-script"]]})

@@ -15,6 +15,7 @@ var Dexie = {
     "events": function () {},
     "getByKeyPath": function () {},
     "setByKeyPath": function () {},
+    "toCollection": function () {},
     "delByKeyPath": function () {},
     "shallowClone": function () {},
     "deepClone": function () {},

@@ -9,6 +9,7 @@
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
             [zelector.common.bgx :as bgx]
+            [zelector.common.core :as zcore]
             [zelector.common.util :as util]))
 
 ; --- support ---
@@ -63,7 +64,7 @@
   (query [this] '[:z/enabled])
   Object
   (render [this]
-    (let [{:keys [z/enabled] :or {enabled false}} (om/props this)]
+    (let [{:keys [z/enabled] :or {enabled zcore/default-enabled}} (om/props this)]
       (dom/div
         #js {}
         (dom/h2 #js {} "Zelector")

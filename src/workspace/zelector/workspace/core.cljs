@@ -8,6 +8,8 @@
             [goog.dom :as gdom]
             [cljsjs.jquery]
             [jayq.core :as j]
+            [oops.core :refer [oget oset! ocall oapply ocall! oapply!
+                               oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
             [cljsjs.papaparse]
             [handsontable]
             [zelector.common.util :as util]
@@ -36,14 +38,14 @@
                              (this-as this
                                (if (#{"edit"} source)
                                  (doseq [[row prop old-val new-val] changes]
-                                   (let [cell-meta (.getCellMeta this row 0)
+                                   (let [cell-meta (ocall this "getCellMeta" row 0)
                                          db-id (gobj/get cell-meta "db-id")]
-                                     (db/update-record! db-id (.getDataAtRow this row)))))))
+                                     (db/update-record! db-id (ocall this "getDataAtRow" row)))))))
               :afterRemoveRow (fn [index amount logical-rows source]
                                 (this-as this
                                   (if-not (#{"clear-table"} source)
                                     (doseq [row logical-rows]
-                                      (let [cell-meta (.getCellMeta this row 0)
+                                      (let [cell-meta (ocall this "getCellMeta" row 0)
                                             db-id (gobj/get cell-meta "db-id")]
                                         (db/delete-record! db-id))))))})))
 
@@ -51,7 +53,7 @@
   (reset! hot (create-table)))
 
 (defn- destroy-table! []
-  (.destroy @hot)
+  (ocall @hot "destroy")
   (reset! hot nil))
 
 (defn- reinstall-table! []
@@ -61,15 +63,15 @@
 ; --- table row/data manipulation ---
 (defn- add-row! [db-id record]
   (let [h @hot
-        empty-first-row (.isEmptyRow h 0)
-        insert-loc (if empty-first-row 0 (.countRows h))
+        empty-first-row (ocall h "isEmptyRow" 0)
+        insert-loc (if empty-first-row 0 (ocall h "countRows"))
         input (clj->js [record])]
     (if (and (zero? insert-loc) empty-first-row)
-      (.populateFromArray h 0 0 input nil nil nil "overwrite")
+      (ocall h "populateFromArray" 0 0 input nil nil nil "overwrite")
       (do
-        (.alter h "insert_row" insert-loc)
-        (.populateFromArray h insert-loc 0 input)))
-    (.setCellMeta h insert-loc 0 "db-id" db-id)))
+        (ocall h "alter" "insert_row" insert-loc)
+        (ocall h "populateFromArray" insert-loc 0 input)))
+    (ocall h "setCellMeta" insert-loc 0 "db-id" db-id)))
 
 (defn- load-table-data! []
   (db/each-record #(add-row! %1 %2)))

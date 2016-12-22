@@ -2,8 +2,8 @@
   "name": "Zelector",
   "version": "0.0.1",
   "browser_action": {
-    "default_title": "Open the Zelector Workspace",
-    //"default_popup": "popup.html",
+    "default_title": "Zelector",
+    "default_popup": "popup.html",
     "default_icon": {
       "19": "images/icon19.png",
       "38": "images/icon38.png"
@@ -18,7 +18,8 @@
   "content_scripts": [
     {
       "matches": [
-        "<all_urls>"
+        "http://*/*",
+        "https://*/*"
       ],
       "css": [
         "css/fa/css/font-awesome-chrome-ext.min.css",
