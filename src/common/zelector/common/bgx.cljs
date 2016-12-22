@@ -11,5 +11,10 @@
 (defn connect! []
   (reset! port (runtime/connect)))
 
+(defn connect-null! []
+  (reset! port (reify proto/IChromePort
+                 (post-message! [this message]
+                   (log (print-str message) ">/null")))))
+
 (defn post-message! [msg]
   (proto/post-message! @port (clj->js msg)))

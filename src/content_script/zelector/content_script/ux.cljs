@@ -273,9 +273,7 @@
 (defn handle-message! [msg]
   (let [{:keys [action params]} (util/js->clj* msg)]
     (case action
-      "config" (do
-                 (log "merge!" (print-str {:durable params}))
-                 (om.next/merge! reconciler {:durable params}))
+      "config" (om.next/merge! reconciler {:durable params})
       nil)))
 
 (defn backgound-connect! []
@@ -299,6 +297,8 @@
 (defn init-basic!
   "Init w/o a browser extension env."
   []
+  (bgx/connect-null!)
+  (om.next/merge! reconciler {:durable {:z/enabled true}})
   (om/add-root! reconciler Zelector (install-glass-mount!)))
 
 (defn destroy-basic! []

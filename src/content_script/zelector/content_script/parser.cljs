@@ -47,7 +47,9 @@
 
 (defmethod mutate 'durable/update
   [{:keys [state query] :as env} key params]
-  {:remote true})
+  {:action (fn [] ; optimistic (esp. nice for bg-less testing)
+             (swap! state update :durable merge params))
+   :remote true})
 
 ; --- mutate buffer ---
 (defmethod mutate 'buffer/push
