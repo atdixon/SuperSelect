@@ -133,7 +133,7 @@
     (-> js/document j/$ (.unbind ".zelector")))
   (render [this]
     (let [{:keys [:mark/ch :mark/over :mark/mark :flag/frozen :buffer]} (om/props this)
-          {{:keys [:z/enabled :z/active]} :durable} (om/props this)
+          {{:keys [:z/enabled :z/active] :or {enabled false active false}} :durable} (om/props this)
           combined (if (and mark over) (combine-ranges* mark over))
           [window-width window-height] (curr-window-size)
           glass-border-width 5]
@@ -196,7 +196,7 @@
                     ; note: we map here over all client rects but split should have produced only one client rect
                     (map-indexed
                       (fn [i rect]
-                        (let [border-width 0]               ; note: enable border-width to see range outlines
+                        (let [border-width 0] ; note: enable border-width to see range outlines
                           (dom/div
                             #js {:key i
                                  :className "zelector-selection-text-rect"
@@ -239,10 +239,10 @@
                                        :height (inc (.-height %2))}}))
                   (trav/range->client-rects over)))
               (debug-info {:captured/range combined
-                                   :over over
-                                   :char ch
-                                   :frozen frozen
-                                   :partition-range-fn partition-range*}))))))))
+                           :over over
+                           :char ch
+                           :frozen frozen
+                           :partition-range-fn partition-range*}))))))))
 
 ; --- remote ---
 (defn- remote
@@ -257,24 +257,9 @@
       :join (bgx/post-message! {:action "config"}))))
 
 ; --- state ---
-(defonce
-  state
-  (atom {:ch nil
-         :over nil
-         :mark nil
-         :freeze nil
-         :debug-active true
-         :buffer []
-         :flags {:debugged nil
-                 :frozen nil}
-         :durable {;:z/enabled true
-                   ;:z/active false
-                   } ; until proven otherwise.
-         }))
-
 (def reconciler
   (om/reconciler
-    {:state  state
+    {:state  (atom {})
      :parser (om/parser {:read parser/read :mutate parser/mutate})
      :send remote}))
 
@@ -288,7 +273,9 @@
 (defn handle-message! [msg]
   (let [{:keys [action params]} (util/js->clj* msg)]
     (case action
-      "config" (om.next/merge! reconciler {:durable params})
+      "config" (do
+                 (log "merge!" (print-str {:durable params}))
+                 (om.next/merge! reconciler {:durable params}))
       nil)))
 
 (defn backgound-connect! []

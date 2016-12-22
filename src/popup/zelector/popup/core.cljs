@@ -63,7 +63,7 @@
   (query [this] '[:z/enabled])
   Object
   (render [this]
-    (let [{:keys [z/enabled]} (om/props this)]
+    (let [{:keys [z/enabled] :or {enabled false}} (om/props this)]
       (dom/div
         #js {}
         (dom/h2 #js {} "Zelector")

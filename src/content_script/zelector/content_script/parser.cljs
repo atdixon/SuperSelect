@@ -21,14 +21,19 @@
 (defmulti read om/dispatch)
 
 (defmethod read :default
-  [{:keys [state] :as env} key params]
+  [{:keys [state query] :as env} key params]
   (let [st @state]
-    {:value (key st)}))
+    {:value (get st key)}))
+
+(defmethod read :buffer
+  [{:keys [state query] :as env} key params]
+  (let [st @state]
+    {:value (get st key [])}))
 
 (defmethod read :durable
   [{:keys [state query] :as env} key params]
   (let [st @state]
-    {:value (key st)
+    {:value (select-keys (get st :durable {}) query)
      :remote true}))
 
 ; --- mutate ---

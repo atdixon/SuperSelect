@@ -1,4 +1,3 @@
--- initial active/enabled state... setting?
 -- restore sandbox dev ability (bgx/....)
 -- configure action bar to always show on all pages but let toggle off/on easy?
 -- buffer sticks across page refreshes and navigations (use synchronous local storage!)
