@@ -6,6 +6,7 @@
             [chromex.ext.runtime :as runtime]
             [chromex.ext.extension :refer-macros [get-url]]
             [chromex.ext.storage :as storage]
+            [chromex.ext.browser-action :refer-macros [set-badge-text]]
             [cljs.core.async :refer [<! chan]]
             [goog.object :as gobj]
             [goog.string :as gstring]
@@ -13,20 +14,9 @@
             [zelector.common.util :as util]
             [zelector.common.db :as db]))
 
+; --- client mgmt ---
 (defonce clients (atom []))
 
-(defn get-stored-keys
-  "Get value for a key/s (a vector of keywords), answer
-  channel of result."
-  [keys]
-  (let [storage (storage/get-local)]
-    (proto/get storage (clj->js keys))))
-
-(defn set-stored-keys! [m]
-  (let [storage (storage/get-local)]
-    (proto/set storage (clj->js m))))
-
-; --- clients ---
 (defn add-client! [port]
   (swap! clients conj port))
 
@@ -38,6 +28,22 @@
   (doseq [client @clients]
     (post-message! client (clj->js msg))))
 
+; --- db ---
+(defn refresh-badge-text! []
+  (db/count-table #(set-badge-text #js {:text (str %)})))
+
+; --- local storage ---
+(defn get-stored-keys
+  "Get value for a key/s (a vector of keywords), answer
+  channel of result."
+  [keys]
+  (let [storage (storage/get-local)]
+    (proto/get storage (clj->js keys))))
+
+(defn set-stored-keys! [m]
+  (let [storage (storage/get-local)]
+    (proto/set storage (clj->js m))))
+
 (defn broadcast-stored-keys!
   "Broadcast clients with all stored keys."
   []
@@ -46,6 +52,7 @@
       (when-not err
         (message-clients*! {:action "config" :params items})))))
 
+; --- client event loop ---
 ; NOTE: Our background "API" supports, e.g.:
 ;
 ;   {action: "record",
@@ -58,7 +65,7 @@
 ; (Empty params for "config" answers all known config properties to
 ; client.)
 ;
-; And answers, e.g.:
+; And sends/"answers", e.g.:
 ;
 ;   {action: "refresh",
 ;    params: {resource: ["db"]}}
@@ -74,7 +81,8 @@
           "record" (do
                      (db/add-record! (:record params))
                      (message-clients*! {:action "refresh"
-                                         :resource ["db"]}))
+                                         :resource ["db"]})
+                     (refresh-badge-text!))
           "config" (if (empty? params)
                      (broadcast-stored-keys!)
                      (set-stored-keys! params))))
@@ -86,7 +94,7 @@
   (post-message! client #js {:action "ping"})
   (run-client-loop! client))
 
-; --- event loop ---
+; --- main event loop ---
 (defn process-event [event-num event]
   (let [[event-id args] event]
     (case event-id
@@ -109,4 +117,5 @@
 
 ; --- init ---
 (defn init! []
-  (boot-event-loop!))
+  (boot-event-loop!)
+  (refresh-badge-text!))

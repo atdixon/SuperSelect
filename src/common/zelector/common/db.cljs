@@ -4,7 +4,7 @@
             [dexie]
             [zelector.common.util]))
 
-(defn create-db! []
+(defn- create-db! []
   (let [db (js/Dexie. "Zelector" #js {:autoOpen true})]
     (-> db
       (.version 1)
@@ -13,11 +13,13 @@
 
 (defonce db (create-db!))
 
-(defn get-table []
+(defn- get-table []
   (gobj/get db "snippets"))
 
+; --- write ---
 (defn add-record! [coll]
-  (.add (get-table) (clj->js {:record coll})))
+  (if-not (empty? coll)
+    (.add (get-table) (clj->js {:record coll}))))
 
 (defn update-record! [db-id coll]
   (.update (get-table) db-id (clj->js {:record coll})))
@@ -28,9 +30,12 @@
 (defn clear-db! []
   (.delete (.toCollection (get-table))))
 
-; todo asynchronize this instead of callback and call it get-all-records???
-(defn with-all-records [callback-fn]
+; --- read ---
+(defn count-table [cb]
+  (.count (get-table) cb))
+
+(defn each-record [cb]
   (.toArray
     (get-table)
     #(doseq [row %]
-      (callback-fn (gobj/get row "id") (gobj/get row "record")))))
+      (cb (gobj/get row "id") (gobj/get row "record")))))

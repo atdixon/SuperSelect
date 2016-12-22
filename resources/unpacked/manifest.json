@@ -36,7 +36,7 @@
   ],
   "background": {
     "page": "background.html",
-    "persistent": false
+    "persistent": true
   },
   "permissions": [
     "tabs", "storage"

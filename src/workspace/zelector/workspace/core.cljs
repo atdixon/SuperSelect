@@ -2,7 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go-loop]])
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
             [chromex.protocols :refer [post-message!]]
-            [chromex.ext.runtime :as runtime :refer-macros [connect]]
+            [chromex.ext.runtime :refer-macros [connect]]
             [cljs.core.async :refer [<!]]
             [goog.object :as gobj]
             [goog.dom :as gdom]
@@ -72,7 +72,7 @@
     (.setCellMeta h insert-loc 0 "db-id" db-id)))
 
 (defn load-table-data! []
-  (db/with-all-records #(add-row! %1 %2)))
+  (db/each-record #(add-row! %1 %2)))
 
 ; --- export ---
 (defn get-data []

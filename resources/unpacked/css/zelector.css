@@ -49,6 +49,8 @@
     font-family: Times, serif;
     font-size: 15px;
     color: white;
+
+    cursor: default;
 }
 #zelector-buffer ul {
     margin: 0;

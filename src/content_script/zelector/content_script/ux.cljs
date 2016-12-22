@@ -83,28 +83,33 @@
         (if-not (empty? buffer)
           (dom/ul #js {:onClick #(.stopPropagation %)
                        :onMouseMove #(.stopPropagation %)}
-                  (css-transition-group
-                    {:transitionName "zelector-buffer-item"
-                     :transitionEnterTimeout 500
-                     :transitionLeaveTimeout 200}
-                    (reverse
-                      (map-indexed
-                        #(buffer-item {:index %1 :id (:id %2) :content (:content %2)})
-                        buffer)))))
+            (css-transition-group
+              {:transitionName "zelector-buffer-item"
+               :transitionEnterTimeout 500
+               :transitionLeaveTimeout 200}
+              (reverse
+                (map-indexed
+                  #(buffer-item {:index %1 :id (:id %2) :content (:content %2)})
+                  buffer)))))
         (dom/div #js {:className "zelector-action-bar"}
-                 (dom/div #js {:style #js {}}
-                          (dom/b nil "Zelector") ": "
-                          (dom/span #js {:style #js {:cursor "pointer"}
-                                         :onClick #(om/transact! this
-                                                    `[(durable/update {:z/active ~(not active)})])}
-                                    (if active "active" "inactive")))
-                 (dom/div #js {:style #js {:float "right"}}
-                           (dom/a #js {:href "#" :title "Clear this buffer"
-                                       :onClick #(clear-buffer!)} "clear")
-                           (dom/a #js {:href "#" :title "Save this buffer to the backend"
-                                       :onClick (fn [event]
-                                                  (save-buffer! buffer)
-                                                  (clear-buffer!))} "save")))))))
+          (dom/div #js {:style #js {}}
+            (dom/b nil "Zelector") ": "
+            (dom/span #js {:style #js {:cursor "pointer"}
+                           :onClick #(do
+                                      (om/transact! this
+                                        `[(durable/update {:z/active ~(not active)})])
+                                      (when active
+                                        (om/transact! this
+                                          '[(z/put {:mark/mark nil})])))}
+              (if active "active" "inactive"))
+            (dom/span #js {} " (Shift+Z)"))
+          (dom/div #js {:style #js {:float "right"}}
+            (dom/a #js {:href "#" :title "Clear this buffer"
+                        :onClick #(clear-buffer!)} "clear")
+            (dom/a #js {:href "#" :title "Save this buffer to the backend"
+                        :onClick (fn [event]
+                                   (save-buffer! buffer)
+                                   (clear-buffer!))} "save")))))))
 (def buffer-view (om/factory BufferView))
 
 (def debug-info (om/factory debug/DebugInfo))
@@ -123,10 +128,13 @@
             (fn [event]
               (let [{{:keys [:z/active]} :durable} (om/props this)
                     inp? (util/input-node? (.-target event))
-                    key? (and (= (.toLowerCase (.-key event)) "z") (.-shiftKey event))]
-                (when (and key? (or active (not inp?)))
-                  (when active
-                    (om/transact! this '[(z/put {:mark/mark nil})]))
+                    z-key? (and (= (.toLowerCase (.-key event)) "z") (.-shiftKey event))
+                    esc-key? (= (.-keyCode event) 27)
+                    clear-mark! #(om/transact! this '[(z/put {:mark/mark nil})])]
+                (when (and active esc-key?)
+                  (clear-mark!))
+                (when (and z-key? (or active (not inp?)))
+                  (when active (clear-mark!))
                   (om/transact! this `[(durable/update {:z/active ~(not active)})])))))))
   (componentWillUnmount [this]
     (-> js/window j/$ (.unbind ".zelector"))
@@ -169,7 +177,7 @@
                                                 `[(z/put {:mark/ch ~char})
                                                   (z/put {:mark/over ~range})]))))))))
                    ; todo - instead of toString on combined, really need to strip long sequences of
-                   ; todo      whitespace, convert paragraph, br, etc. breaks into newlines etc. -- how?
+                   ; todo     whitespace, convert paragraph, br, etc. breaks into newlines etc. -- how?
                    :onClick (fn [event]
                               (if mark
                                 (om/transact! this `[(buffer/push {:value ~(trav/range->str combined)})
@@ -295,7 +303,7 @@
 
 ; --- for sandbox ---
 (defn init-basic!
-  "Init w/o a browser extension env."
+  "Init bg-less, i.e., w/o a browser extension env."
   []
   (bgx/connect-null!)
   (om.next/merge! reconciler {:durable {:z/enabled true}})
