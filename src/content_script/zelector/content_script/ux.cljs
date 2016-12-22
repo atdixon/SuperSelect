@@ -37,15 +37,14 @@
   "Split range for UX; general goal is to split range so that each result resides in
   single client rect but optimizing toward keeping number of splits small."
   (util/resettable-memoize
-    (fn
-      [range]
+    (fn [range]
       {:pre [(vector? range)]}
       ; get rid of empty ranges
       (filter (complement trav/empty-range?)
-              ; split each range until none have same parent and then trim each range to exclude spaces at ends
-              (mapcat #(-> % trav/trim-range trav/partition-range-by*)
-                      ; split ranges until none have > 1 client rects
-                      (trav/partition-range-with* range single-rect?))))))
+        ; split each range until none have same parent and then trim each range to exclude spaces at ends
+        (mapcat #(-> % trav/trim-range trav/partition-range-by*)
+          ; split ranges until none have > 1 client rects
+          (trav/partition-range-with* range single-rect?))))))
 
 (defn- combine-ranges* [mark over]
   (trav/grow-ranger (trav/combine-ranges mark over) util/punctuation-char?))
@@ -107,7 +106,7 @@
             (dom/a #js {:href "#" :title "Clear this buffer"
                         :onClick #(clear-buffer!)} "clear")
             (dom/a #js {:href "#" :title "Save this buffer to the backend"
-                        :onClick (fn [event]
+                        :onClick (fn [e]
                                    (save-buffer! buffer)
                                    (clear-buffer!))} "save")))))))
 (def buffer-view (om/factory BufferView))
@@ -125,11 +124,11 @@
       (bind js/window "resize.zelector" #(reset-memoizations!))
       (bind js/window "resize.zelector scroll.zelector" #(.forceUpdate this))
       (bind js/document "keydown.zelector"
-            (fn [event]
+            (fn [e]
               (let [{{:keys [:z/active]} :durable} (om/props this)
-                    inp? (util/input-node? (.-target event))
-                    z-key? (and (= (.toLowerCase (.-key event)) "z") (.-shiftKey event))
-                    esc-key? (= (.-keyCode event) 27)
+                    inp? (util/input-node? (.-target e))
+                    z-key? (and (= (.toLowerCase (.-key e)) "z") (.-shiftKey e))
+                    esc-key? (= (.-keyCode e) 27)
                     clear-mark! #(om/transact! this '[(z/put {:mark/mark nil})])]
                 (when (and active esc-key?)
                   (clear-mark!))
@@ -157,11 +156,11 @@
                         :left 0
                         :width (- window-width glass-border-width glass-border-width)
                         :height (- window-height glass-border-width glass-border-width)}
-                   :onMouseMove (fn [event]
+                   :onMouseMove (fn [e]
                                   (if-not frozen
-                                    (let [glass (.-currentTarget event)
-                                          client-x (.-clientX event)
-                                          client-y (.-clientY event)
+                                    (let [glass (.-currentTarget e)
+                                          client-x (.-clientX e)
+                                          client-y (.-clientY e)
                                           ;; must set pointer events inline/immediately
                                           ;; how else do we capture caret position in
                                           ;; underlying doc/body. then must set it back.
@@ -178,7 +177,7 @@
                                                   (z/put {:mark/over ~range})]))))))))
                    ; todo - instead of toString on combined, really need to strip long sequences of
                    ; todo     whitespace, convert paragraph, br, etc. breaks into newlines etc. -- how?
-                   :onClick (fn [event]
+                   :onClick (fn [e]
                               (if mark
                                 (om/transact! this `[(buffer/push {:value ~(trav/range->str combined)})
                                                      (z/put {:mark/mark nil})])
@@ -306,7 +305,7 @@
   "Init bg-less, i.e., w/o a browser extension env."
   []
   (bgx/connect-null!)
-  (om.next/merge! reconciler {:durable {:z/enabled true}})
+  (om.next/merge! reconciler {:durable {:z/enabled true :z/active true}})
   (om/add-root! reconciler Zelector (install-glass-mount!)))
 
 (defn destroy-basic! []

@@ -13,34 +13,27 @@
     (let [{:keys [captured/range over char frozen partition-range-fn]} (om/props this)]
       (dom/div #js {:id      "zelector-debug"
                     :onClick #(.stopPropagation %)}
-        (letfn [(fmt [[[sc so] [ec eo] :as range]]
+        (letfn [(layout [[[sc so] [ec eo] :as range]]
                   (if range
                     (let [text (trav/range->str range) len (count text)]
                       (list
-                        (str "[" char "]")
-                        (dom/br #js {:key "1a"})
-                        "---"
-                        (dom/br #js {:key "1b"})
-                        (gstr/format
-                          "%s[%s]...%s[%s]"
-                          (util/pretty-node (util/parent-node sc))
-                          (util/node->sibling-index sc)
-                          (util/pretty-node (util/parent-node ec))
-                          (util/node->sibling-index ec))
-                        (dom/br #js {:key "2a"})
-                        "---"
-                        (dom/br #js {:key "2b"})
-                        (dom/span #js {:key   "3a"
-                                       :style #js {:fontSize 8
-                                                   :verticalAlign "sub"}} so)
-                        (if (< len 50)
-                          text (str (subs text 0 25) "..." (subs text (- len 25))))
-                        (dom/span #js {:key   "3b"
-                                       :style #js {:fontSize 8
-                                                   :verticalAlign "sub"}} eo)
-                        (dom/br #js {:key "4a"})
-                        "---"
-                        (dom/br #js {:key "4b"})
+                        (dom/div nil (dom/i nil "char = ") char)
+                        (dom/div nil
+                          (dom/i nil "word = ")
+                          (dom/span #js {:style #js {:fontSize 8
+                                                     :verticalAlign "sub"}}
+                            (gstr/format "[%s.tns[%d],%d]"
+                              (util/pretty-node (util/parent-node sc))
+                              (util/node->sibling-index sc)
+                              so))
+                          (if (< len 50)
+                            text (str (subs text 0 25) "..." (subs text (- len 25))))
+                          (dom/span #js {:style #js {:fontSize 8
+                                                     :verticalAlign "sub"}}
+                            (gstr/format "[%s.tns[%d],%d]"
+                              (util/pretty-node (util/parent-node ec))
+                              (util/node->sibling-index ec)
+                              eo)))
                         (dom/div
                           #js {:key "5z"
                                :className "zelector-debug-breakdown"}
@@ -58,14 +51,11 @@
                                 (dom/span #js {:key (str idx "c")
                                                :style #js {:fontSize 8
                                                            :verticalAlign "super"}}
-                                  (str (trav/valid-range? split)))
+                                  (str (if (trav/valid-range? split) "valid" "invalid")))
                                 "]"))
                             (partition-range-fn range)))
-                        (dom/br #js {:key "5a"})
-                        "---"
-                        (dom/br #js {:key "5b"})
                         (dom/div #js {:key "5"
                                       :onClick
                                       (fn [] (om/transact! this `[(debug/toggle-freeze)]))}
                           (if frozen "FROZEN" "ACTIVE"))))))]
-          (fmt (or range over)))))))
+          (layout (or range over)))))))

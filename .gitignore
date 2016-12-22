@@ -13,4 +13,5 @@ target
 resources/release/css
 resources/release/images
 resources/unpacked/compiled/
+resources/release/compiled/
 .chrome-profile/

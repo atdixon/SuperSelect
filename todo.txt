@@ -11,6 +11,7 @@
 -- MOVE ON
 
 future
+-- include pseudo-element content in selections?
 -- download csv gets filename
 -- scrollable buffer
 -- capture simple styles in the selection

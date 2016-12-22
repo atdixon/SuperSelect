@@ -154,20 +154,16 @@
                      (map #(vector (-> % str->camel-case keyword) (.css $elem %)) css-props)))))
 
 ; --- pretty ---
-(defn thing->pretty [thing]
-  (with-out-str (cljs.pprint/pprint thing)))
-
 (defn pretty-node [node]
   (if (seq? node)
     (str/join "," (map pretty-node node))
     (let [node-type (if-not (nil? node) (node-type node))]
       (case node-type
         1 (str (.toLowerCase (j/prop (j/$ node) "tagName"))
-               "/"
                (or
                  (if-not (str/blank? (j/prop (j/$ node) "id")) (str "#" (j/prop (j/$ node) "id")))
                  (if-not (str/blank? (j/prop (j/$ node) "class")) (str "." (j/prop (j/$ node) "class")))
-                 "_"))
+                 ""))
         3 (if (str/blank? (text-content node))
             "\"<blank>\""
             (str "\"" (text-content node) "\""))

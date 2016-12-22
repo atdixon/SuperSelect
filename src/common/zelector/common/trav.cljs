@@ -12,7 +12,7 @@
   "Convert js/Range to cljs."
   [js-range]
   ((juxt (juxt util/start-container util/start-offset)
-         (juxt util/end-container util/end-offset)) js-range))
+     (juxt util/end-container util/end-offset)) js-range))
 
 (def range->js
   "Convert cljs range to js/Range."
@@ -46,8 +46,8 @@
   (or
     (= [sc so] [ec eo])
     (= 1
-       (.comparePoint
-         (range->js [[sc so] [sc so]]) ec eo))))
+      (.comparePoint
+        (range->js [[sc so] [sc so]]) ec eo))))
 
 ; --- traversal &c ---
 (defn node->leaves
@@ -55,15 +55,15 @@
   from left to right."
   [node]
   (-> node
-      (j/$)
-      ; note: no need for iframes; which can yield xdomain security errs anyway.
-      (j/find ":not('iframe')")
-      (.addBack)
-      (.contents)
-      (.addBack)
-      (.filter #(util/leaf-node? %2))
-      (.toArray)
-      (array-seq)))
+    (j/$)
+    ; note: no need for iframes; which can yield xdomain security errs anyway.
+    (j/find ":not('iframe')")
+    (.addBack)
+    (.contents)
+    (.addBack)
+    (.filter #(util/leaf-node? %2))
+    (.toArray)
+    (array-seq)))
 
 (defn leaves-from
   "Answer lazy seq of leaf nodes starting at the provided from node
@@ -90,7 +90,7 @@
   "Visible text node? Effectively defines the class of text nodes that we
   wish to consider when traversing or manipulating nodes and ranges."
   (every-pred util/text-node? util/visible-node?
-              (comp (complement empty?) util/text-content)))
+    (comp (complement empty?) util/text-content)))
 
 (defn next-text-nodes
   "Answer lazy seq of *visible*, non-empty text nodes from provided node
@@ -147,7 +147,7 @@
    actually maps of the form {:char <ch> :position [<container> <offset>]}."
   [text-node]
   (map #(hash-map :char %2 :position [text-node %1])
-       (iterate inc 0) (util/text-content text-node)))
+    (iterate inc 0) (util/text-content text-node)))
 
 (defn position->char-seq
   "Return lazy seq of {:char <ch> :position <pos>} starting at and *including*
@@ -157,13 +157,13 @@
   (if-let [[container index] position]
     (case direction
       :right (concat (drop index (text-node->chars container))
-                     (apply concat
-                            (map text-node->chars
-                                 (next-text-nodes root container direction))))
+               (apply concat
+                 (map text-node->chars
+                   (next-text-nodes root container direction))))
       :left (concat (reverse (take (inc index) (text-node->chars container)))
-                    (apply concat
-                           (map (comp reverse text-node->chars)
-                                (next-text-nodes root container direction)))))))
+              (apply concat
+                (map (comp reverse text-node->chars)
+                  (next-text-nodes root container direction)))))))
 
 (defn count-chars-while
   "Count chars from position (*including* position if it indexes
@@ -185,23 +185,44 @@
    (let [n (count-chars-while root position direction while-pred)]
      (+position root position (case direction :left (- n) :right n)))))
 
+(defn normalize-range*
+  "If range is not empyt and its start offset is at the tail of its container,
+  then bump/inc its start position into the next/adjacent container."
+  [[[sc so] [ec eo] :as range]]
+  {:pre [(visible-text-node? sc)
+         (<= 0 so (count (util/text-content sc)))
+         (visible-text-node? ec)
+         (<= 0 eo (count (util/text-content ec)))]}
+  (if (and
+        (not (= sc ec))
+        (= so (count (util/text-content sc))))
+    (if-let [sc' (first (next-text-nodes sc :right))]
+      [[sc' 0] [ec eo]]
+      range)
+    range))
+
 (defn position->range
   "Given a position ([container index]), produce maximum range containing that position
    where while-pred is true for all characters to the left and right of that position.
 
-   When pred(s) are not true for the character at provided position, the position is
-   kept as-is within the answered range."
+   When pred(s) are not true for the initial position/character, the position is kept
+   as-is within the answered range.
+
+   Preds operate on {:char <ch> :position [<container> <index>]}."
+  ([position while-pred]
+   (position->range nil position while-pred))
   ([root position while-pred]
    (position->range root position while-pred while-pred))
   ([root [container index :as position] while-predl while-predr]
    {:pre [(visible-text-node? container)
           (< -1 index (count (util/text-content container)))]}
    (let [ch (.charAt (util/text-content container) index)]
-     [(if (while-predl ch)
-        (inc-position
-          (+position-while root position :left #(while-predl (:char %))))
-        position)
-      (+position-while root position :right #(while-predr (:char %)))])))
+     (normalize-range*
+       [(if (while-predl {:char ch :position position})
+          (inc-position
+            (+position-while root position :left while-predl))
+          position)
+        (+position-while root position :right while-predr)]))))
 
 (defn grow-ranger
   "Grow range to the right per char predicate."
@@ -231,9 +252,9 @@
       (cons
         (text-node->range sc so)
         (map text-node->range
-             (take-while
-               #(not= % ec)
-               (next-text-nodes sc :right))))
+          (take-while
+            #(not= % ec)
+            (next-text-nodes sc :right))))
       (list (text-node->range ec 0 eo)))))
 
 (defn range->char-seq
@@ -269,10 +290,13 @@
   that contains that position."
   ([position]
    (position->word-range nil position))
-  ([root position]
-   {:pre [(visible-text-node? (position 0))]}
+  ([root [container offset :as position]]
+   {:pre [(visible-text-node? container)]}
    (trim-range
-     (position->range root position (complement util/whitespace-char?))
+     (position->range root position
+       #(and
+         (= container ((:position %) 0))
+         (not (util/whitespace-char? (:char %)))))
      util/punctuation-char?)))
 
 (defn combine-js-ranges
