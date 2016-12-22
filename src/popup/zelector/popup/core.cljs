@@ -42,7 +42,7 @@
      :remote true}))
 
 (defmethod mutate 'z/update
-  [env key params]
+  []
   {:remote true})
 
 ; --- remote ---
@@ -69,7 +69,7 @@
         (dom/h2 #js {} "Zelector")
         (dom/ul #js {}
                 (if enabled
-                  (dom/li #js {:onClick #(om/transact! this '[(z/update {:z/enabled false})])}
+                  (dom/li #js {:onClick #(om/transact! this '[(z/update {:z/enabled false :z/active false})])}
                           (dom/span #js {:className "fa fa-check"}) "Enabled")
                   (dom/li #js {:onClick #(om/transact! this '[(z/update {:z/enabled true})])}
                           (dom/span #js {:className "fa fa-times"}) "Disabled"))
@@ -91,13 +91,13 @@
 ;    params: {z/enabled: true}}
 ; note: any "config" actions we'll merge the data directly into
 ;       our application/reconciler state.
-(defn handle-message! [msg]
+(defn- handle-message! [msg]
   (let [{:keys [action params]} (util/js->clj* msg)]
     (case action
       "config" (om.next/merge! reconciler params)
       nil)))
 
-(defn backgound-connect! []
+(defn- backgound-connect! []
   (let [port (bgx/connect!)]
     (go-loop []
       (when-let [msg (<! port)]

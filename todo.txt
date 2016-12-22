@@ -1,9 +1,7 @@
--- show count of backend table in badge
--- clear mark on inactivate glass (first, better om/next data "api")
--- styling etc
--- privatize fns, organize requires
+-- prod build and initial test
 -- handling port disconnects (e.g. bg cxns clients); make background persistent = false??
 -- compiler warnings (see pocket)
+-- test w/ initial install (no local storage, no indexedb data)
 -- simple selection v. (slower?) rect rendering
 -- brand: zelect, super select, human scraper, web glass,
 -- oss w/ readme/writeup

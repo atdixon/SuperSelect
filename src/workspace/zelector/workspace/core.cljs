@@ -17,7 +17,7 @@
 ; --- workspace ---
 (defonce hot (atom nil))
 
-(defn create-table []
+(defn- create-table []
   (js/Handsontable.
     (gdom/getElement "table")
     (clj->js {; ht bug/oddness: ht requires at min one data row
@@ -47,19 +47,19 @@
                                             db-id (gobj/get cell-meta "db-id")]
                                         (db/delete-record! db-id))))))})))
 
-(defn install-table! []
+(defn- install-table! []
   (reset! hot (create-table)))
 
-(defn destroy-table! []
+(defn- destroy-table! []
   (.destroy @hot)
   (reset! hot nil))
 
-(defn reinstall-table! []
+(defn- reinstall-table! []
   (destroy-table!)
   (install-table!))
 
 ; --- table row/data manipulation ---
-(defn add-row! [db-id record]
+(defn- add-row! [db-id record]
   (let [h @hot
         empty-first-row (.isEmptyRow h 0)
         insert-loc (if empty-first-row 0 (.countRows h))
@@ -71,11 +71,11 @@
         (.populateFromArray h insert-loc 0 input)))
     (.setCellMeta h insert-loc 0 "db-id" db-id)))
 
-(defn load-table-data! []
+(defn- load-table-data! []
   (db/each-record #(add-row! %1 %2)))
 
 ; --- export ---
-(defn get-data []
+(defn- get-data []
   (let [h @hot]
     (.getData h)))
 
@@ -85,12 +85,15 @@
                           (js/encodeURIComponent csv)))))
 
 ; --- init ---
-(defn bind-handlers! []
+(defn- bind-handlers! []
   (.bind (j/$ "#download") "click.zelector" #(export-csv))
   (.bind (j/$ "#clear") "click.zelector"
-         #(do (db/clear-db!) (reinstall-table!))))
+         #(do (db/clear-db!)
+              (reinstall-table!)
+              (bgx/post-message! {:action "refresh"
+                                  :params {:resource ["badge"]}}))))
 
-(defn unbind-handlers! []
+(defn- unbind-handlers! []
   (.unbind (j/$ "#download") "click.zelector")
   (.unbind (j/$ "#clear") "click.zelector"))
 
@@ -98,14 +101,14 @@
 ; handle messages like, e.g.,
 ;   {action: "refresh",
 ;    params: {resource: ["db"]}}
-(defn handle-message! [msg]
+(defn- handle-message! [msg]
   (let [{:keys [action params]} (util/js->clj* msg)]
     (case action
       "refresh" (do (reinstall-table!)
                     (load-table-data!)) ; poorman's, for now.
       nil)))
 
-(defn backgound-connect! []
+(defn- backgound-connect! []
   (let [port (bgx/connect!)]
     (go-loop []
       (when-let [msg (<! port)]

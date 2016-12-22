@@ -57,10 +57,11 @@
 ;
 ;   {action: "record",
 ;    params: {record: []}}
-;
 ;   {action: "config",
 ;    params: {z/enabled: true,
 ;             z/active: true}}
+;   {action: "refresh",
+;    params: {resource: ["badge"]}}
 ;
 ; (Empty params for "config" answers all known config properties to
 ; client.)
@@ -85,7 +86,10 @@
                      (refresh-badge-text!))
           "config" (if (empty? params)
                      (broadcast-stored-keys!)
-                     (set-stored-keys! params))))
+                     (set-stored-keys! params))
+          "refresh" (doseq [res (:resource params)]
+                      (case res
+                        "badge" (refresh-badge-text!)))))
       (recur))
     (remove-client! client)))
 
@@ -96,6 +100,7 @@
 
 ; --- main event loop ---
 (defn process-event [event-num event]
+  (log (gstring/format "BACKGROUND: got chrome event (%05d)" event-num) event)
   (let [[event-id args] event]
     (case event-id
       ::runtime/on-connect (apply handle-client-connection! args)

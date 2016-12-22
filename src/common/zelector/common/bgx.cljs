@@ -6,7 +6,7 @@
             [cljs.core.async :refer [<!]]
             [zelector.common.util]))
 
-(defonce port (atom nil))
+(defonce ^:private port (atom nil))
 
 (defn connect! []
   (reset! port (runtime/connect)))

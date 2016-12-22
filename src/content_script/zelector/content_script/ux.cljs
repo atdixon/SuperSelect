@@ -15,25 +15,25 @@
             [zelector.content-script.debug-panel :as debug]))
 
 ; --- util ---
-(defn curr-window-size []
+(defn- curr-window-size []
   (let [$win (j/$ js/window)]
     [(.width $win) (.height $win)]))
 
-(defn css-transition-group [props children]
+(defn- css-transition-group [props children]
   (js/React.createElement
     js/React.addons.CSSTransitionGroup
     (clj->js (merge props {:children children}))))
 
 ; --- actions ---
-(defn save-buffer! [buffer]
+(defn- save-buffer! [buffer]
   (let [as-record (map :content buffer)]
     (bgx/post-message! {:action "record" :params {:record as-record}})))
 
 ; --- ui functions ---
-(defn single-rect? [range]
+(defn- single-rect? [range]
   (<= (count (trav/range->client-rects range)) 1))
 
-(def partition-range*
+(def ^:private partition-range*
   "Split range for UX; general goal is to split range so that each result resides in
   single client rect but optimizing toward keeping number of splits small."
   (util/resettable-memoize
@@ -47,10 +47,10 @@
                       ; split ranges until none have > 1 client rects
                       (trav/partition-range-with* range single-rect?))))))
 
-(defn combine-ranges* [mark over]
+(defn- combine-ranges* [mark over]
   (trav/grow-ranger (trav/combine-ranges mark over) util/punctuation-char?))
 
-(defn reset-memoizations!
+(defn- reset-memoizations!
   "Reset memoization state for fns that are sensitive to window dimensions, etc."
   []
   (trav/partition-range-by* :reset!)
@@ -278,13 +278,13 @@
 ;             z/active: true}}
 ; note: any "config" actions we'll merge the data directly into
 ;       our application/reconciler :durable state state.
-(defn handle-message! [msg]
+(defn- handle-message! [msg]
   (let [{:keys [action params]} (util/js->clj* msg)]
     (case action
       "config" (om.next/merge! reconciler {:durable params})
       nil)))
 
-(defn backgound-connect! []
+(defn- backgound-connect! []
   (let [port (bgx/connect!)]
     (go-loop []
       (when-let [msg (<! port)]
@@ -292,7 +292,7 @@
         (recur)))))
 
 ; --- lifecycle ---
-(defn install-glass-mount! []
+(defn- install-glass-mount! []
   (-> (j/$ "<div id=\"zelector-glass-mount\">")
     (.appendTo "body")
     (aget 0)))
