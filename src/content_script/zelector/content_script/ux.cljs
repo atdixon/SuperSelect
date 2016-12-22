@@ -103,12 +103,14 @@
               (if active "active" "inactive"))
             (dom/span #js {} " (Shift+Z)"))
           (dom/div #js {:style #js {:float "right"}}
-            (dom/a #js {:href "#" :title "Clear this buffer"
-                        :onClick #(clear-buffer!)} "clear")
-            (dom/a #js {:href "#" :title "Save this buffer to the backend"
-                        :onClick (fn [e]
-                                   (save-buffer! buffer)
-                                   (clear-buffer!))} "save")))))))
+            (dom/span #js {:className "zelector-action-link"
+                           :title "Clear this buffer"
+                           :onClick #(clear-buffer!)} "clear")
+            (dom/span #js {:className "zelector-action-link"
+                           :title "Save this buffer to the backend"
+                           :onClick (fn [e]
+                                      (save-buffer! buffer)
+                                      (clear-buffer!))} "save")))))))
 (def buffer-view (om/factory BufferView))
 
 (def debug-info (om/factory debug/DebugInfo))
@@ -252,23 +254,25 @@
                            :partition-range-fn partition-range*}))))))))
 
 ; --- remote ---
-(defn- remote
+(defn- send*
   "Handle remote/send. Assume singleton vector of read/mutate queries.
   Assume reads are for single/flat props (i.e., a :join with single/flat
   props). Assume mutate is update with single params map."
-  [{:keys [remote]} cb]
-  (let [ast (-> remote om/query->ast :children first)]
-    (case (:type ast)
-      :call (bgx/post-message! {:action "config"
-                                :params (:params ast)})
-      :join (bgx/post-message! {:action "config"}))))
+  [{:keys [durable]} cb]
+  (if durable
+    (let [ast (-> durable om/query->ast :children first)]
+      (case (:type ast)
+        :call (bgx/post-message! {:action "config"
+                                  :params (:params ast)})
+        :join (bgx/post-message! {:action "config"})))))
 
 ; --- state ---
 (def reconciler
   (om/reconciler
     {:state  (atom {})
      :parser (om/parser {:read parser/read :mutate parser/mutate})
-     :send remote}))
+     :send send*
+     :remotes [:durable]}))
 
 ; --- background ---
 ; handle messages like, e.g.,

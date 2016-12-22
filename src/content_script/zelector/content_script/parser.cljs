@@ -34,7 +34,7 @@
   [{:keys [state query] :as env} key params]
   (let [st @state]
     {:value (select-keys (get st :durable {}) query)
-     :remote true}))
+     :durable true}))
 
 ; --- mutate ---
 (defmulti mutate om/dispatch)
@@ -49,7 +49,7 @@
   [{:keys [state query] :as env} key params]
   {:action (fn [] ; optimistic (esp. nice for bg-less testing)
              (swap! state update :durable merge params))
-   :remote true})
+   :durable true})
 
 ; --- mutate buffer ---
 (defmethod mutate 'buffer/push

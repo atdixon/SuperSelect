@@ -122,61 +122,19 @@
     display: inline-block;
 }
 
-#zelector-buffer .zelector-action-bar a {
+#zelector-buffer .zelector-action-link {
     color: white;
+    text-decoration: underline;
     margin-left: 5px;
-}
-
-/* context menu */
-.zelector-context-menu {
-    user-select: none;
-    position: fixed;
-
-    padding: 6px 0;
-    margin: 0;
-
-    font-family: Arial, sans-serif;
-    font-size: 13px;
-    color: #333;
-    background: #fff;
-    border: 1px solid #494949;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-.zelector-context-menu ul {
-    list-style-type: none;
-
-    padding: 0;
-    margin: 0;
-}
-.zelector-context-menu-item {
     cursor: pointer;
-    white-space: nowrap;
-
-    margin: 0 5px;
-    padding: 3px 6px;
-}
-.zelector-context-menu-item.zelector-disabled {
-    color: #808080;
-}
-.zelector-context-menu .fa {
-    width: 10px;
-    margin-right: 10px;
-}
-.zelector-context-menu-item:not(.zelector-disabled):hover {
-    background-color: #eee;
-}
-.zelector-context-menu-item-separator {
-    border-top: 1px solid #ebebeb;
-    margin-top: 6px;
-    margin-bottom: 5px;
 }
 
 /* debug */
 #zelector-debug {
     float: right;
+    overflow: auto;
 
     width: 350px;
-    height: 125px;
     margin: 15px;
     padding: 5px;
 

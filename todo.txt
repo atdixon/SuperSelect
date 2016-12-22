@@ -11,6 +11,7 @@
 -- MOVE ON
 
 future
+-- sticky buffer surviving refreshes and navigations
 -- include pseudo-element content in selections?
 -- download csv gets filename
 -- scrollable buffer
@@ -28,7 +29,7 @@ other
 -- O/n of traversals
 -- org om components for minimal odm diffs/updates
 -- reconnect to bg page after extension refresh/update!
--- save-buffer! v. om :remotes
+-- save-buffer! and other buffer ops handled via remotes
 -- when to use #shadow-dom
 -- lose jquery, use goog.dom,*; document.querySelector(), etc.
 -- lose dexie
