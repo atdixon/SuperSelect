@@ -1,4 +1,5 @@
 -- stylin'
+-- click to disable/enable. workspace opens from action bar. no popup. title text = Enable|Disable Zelector
 -- handling port disconnects (e.g. bg cxns clients)
     -- evaporate content script on port disconnect??
 -- test w/ initial install (no local storage, no indexedb data)
