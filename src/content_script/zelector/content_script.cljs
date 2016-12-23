@@ -1,4 +1,4 @@
 (ns ^:figwheel-no-load zelector.content-script
-  (:require [zelector.content-script.ux :as ux]))
+  (:require [zelector.content-script.ui :as ui]))
 
-(ux/init!)
+(ui/init!)

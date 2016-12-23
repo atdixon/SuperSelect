@@ -1,4 +1,4 @@
-(ns zelector.content-script.ux
+(ns zelector.content-script.ui
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
             [cljs.core.async :refer [<! >! put! chan]]

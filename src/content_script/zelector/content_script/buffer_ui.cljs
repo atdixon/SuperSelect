@@ -43,15 +43,15 @@
                   buffer)))))
         (dom/div #js {:className "zelector-action-bar"}
           (dom/div #js {:style #js {}}
-            (dom/b nil "Zelector") ": "
-            (dom/span #js {:style #js {:cursor "pointer"}
+            (dom/span #js {:style #js {:fontWeight (if active "bold" "normal")
+                                       :cursor "pointer"}
                            :onClick #(do
                                       (om/transact! this
                                         `[(durable/update {:z/active ~(not active)})])
                                       (when active
                                         (om/transact! this
                                           '[(z/put {:mark/mark nil})])))}
-              (if active "active" "inactive"))
+              "Zelector")
             (dom/span #js {} " (Shift+Z)"))
           (dom/div #js {:style #js {:float "right"}}
             (dom/span #js {:className "zelector-action-link"

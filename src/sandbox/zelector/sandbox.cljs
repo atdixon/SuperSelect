@@ -1,14 +1,14 @@
 (ns zelector.sandbox
   (:require
-    [zelector.content-script.ux :as ux]
+    [zelector.content-script.ui :as ui]
     [chromex.logging :refer-macros [log info warn error group group-end]]))
 
 (defn fig-reload-hook []
   (log "fig-reload-hook")
-  (ux/destroy-basic!)
-  (ux/init-basic!))
+  (ui/destroy-basic!)
+  (ui/init-basic!))
 
 (defonce setup
   (do
     (log "sandbox: setup")
-    (ux/init-basic!)))
+    (ui/init-basic!)))

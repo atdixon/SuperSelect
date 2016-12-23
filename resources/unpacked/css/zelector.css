@@ -14,7 +14,7 @@
 
     border: 5px solid rgb(0, 100, 255);
     margin: 0;
-    background-color: rgba(0, 0, 255, 0.001);
+    background-color: rgba(0, 0, 255, 0.03);
 }
 
 /* selection */
@@ -129,12 +129,14 @@
 
 /* action bar */
 #zelector-buffer .zelector-action-bar {
+    user-select: none;
     border: 2px solid #494949;
     margin-top: 2px;
     padding: 2px;
     font-family: Arial, serif;
-    font-size: 10px;
+    font-size: 12px;
     background-color: rgba(0, 0, 0, 0.6);
+    line-height: normal;
 }
 
 #zelector-buffer .zelector-action-bar div {
