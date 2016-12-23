@@ -18,7 +18,8 @@
 
   :plugins [[lein-cljsbuild "1.1.4"]
             [lein-figwheel "0.5.8"]
-            [lein-environ "1.1.0"]]
+            [lein-environ "1.1.0"]
+            [lein-shell "0.5.0"]]
 
   :source-paths ["src/common"
                  "src/background"
@@ -190,6 +191,7 @@
                                              :provides ["dexie"]}
                                             {:file "foreign-lib/handsontable/handsontable.full.min.js"
                                              :provides ["handsontable"]}]
+                             :closure-defines {"goog.DEBUG" false}
                              :language-in :ecmascript5 :language-out :ecmascript5}}]}}]}
 
   :aliases {"dev-build" ["with-profile" "+unpacked,+unpacked-content-script" "cljsbuild" "once"]
@@ -198,4 +200,5 @@
             "sandbox" ["with-profile" "+sandbox,+figwheel" "figwheel" "sandbox"]
             "release" ["with-profile" "+release" "do"
                        ["clean"]
-                       ["cljsbuild" "once" "background" "popup" "workspace" "content-script"]]})
+                       ["cljsbuild" "once" "background" "popup" "workspace" "content-script"]]
+            "package" ["shell" "scripts/package.sh"]})

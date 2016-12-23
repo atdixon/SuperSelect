@@ -24,7 +24,9 @@
       (let [found-tabs (first (<! res))]
         (if (empty? found-tabs)
           (tabs/create (clj->js {:url url}))
-          (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))))))
+          (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))
+        ; close popup only after async open-workspace command succeeds
+        (close-popup!)))))
 
 ; --- state ---
 ;   assume z/enabled true until proven otherwise; om/next
@@ -74,7 +76,7 @@
                           (dom/span #js {:className "fa fa-check"}) "Enabled")
                   (dom/li #js {:onClick #(om/transact! this '[(z/update {:z/enabled true})])}
                           (dom/span #js {:className "fa fa-times"}) "Disabled"))
-                (dom/li #js {:onClick #(do (open-workspace!) (close-popup!))}
+                (dom/li #js {:onClick #(open-workspace!)}
                         (dom/span #js {:className "fa fa-table"}) "Go to Workspace"))))))
 
 (def parser

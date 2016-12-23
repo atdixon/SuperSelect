@@ -1,6 +1,7 @@
 (ns zelector.common.util
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
             [clojure.string :as str]
+            [clojure.walk :as walk :refer [keywordize-keys]]
             [cljsjs.jquery]
             [jayq.core :as j]))
 
@@ -49,7 +50,7 @@
   (-key->js [x] (keyword->fqn x)))
 
 (defn js->clj* [val]
-  (clojure.walk/keywordize-keys (js->clj val)))
+  (keywordize-keys (js->clj val)))
 
 ; --- dom ---
 (extend-type js/NodeList

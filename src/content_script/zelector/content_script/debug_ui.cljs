@@ -1,4 +1,4 @@
-(ns zelector.content-script.debug-panel
+(ns zelector.content-script.debug-ui
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
@@ -7,7 +7,7 @@
             [zelector.common.util :as util]
             [zelector.common.trav :as trav]))
 
-(defui DebugInfo
+(defui DebugView
   Object
   (render [this]
     (let [{:keys [captured/range over char frozen partition-range-fn]} (om/props this)]
