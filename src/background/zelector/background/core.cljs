@@ -113,7 +113,7 @@
       (let [{:keys [action params]} (util/js->clj* msg)]
         (case action
           "record" (do
-                     (db/add-record! (:record params))
+                     (db/add-record! (:record params) (:provenance params))
                      (message-clients*! {:action "refresh"
                                          :resource ["db"]})
                      (refresh-badge!))

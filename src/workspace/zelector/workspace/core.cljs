@@ -61,7 +61,7 @@
   (install-table!))
 
 ; --- table row/data manipulation ---
-(defn- add-row! [db-id record]
+(defn- add-row! [db-id record provenance]
   (let [h @hot
         empty-first-row (ocall h "isEmptyRow" 0)
         insert-loc (if empty-first-row 0 (ocall h "countRows"))
@@ -71,18 +71,42 @@
       (do
         (ocall h "alter" "insert_row" insert-loc)
         (ocall h "populateFromArray" insert-loc 0 input)))
-    (ocall h "setCellMeta" insert-loc 0 "db-id" db-id)))
+    (ocall h "setCellMeta" insert-loc 0 "db-id" db-id)
+    (ocall h "setCellMeta" insert-loc 0 "provenance" provenance)))
 
 (defn- load-table-data! []
-  (db/each-record #(add-row! %1 %2)))
+  (db/each-record #(add-row! %1 %2 %3)))
 
 ; --- export ---
-(defn- get-data []
+(defn- get-data
+  "Answer vector of vectors (rows) in order."
+  []
   (let [h @hot]
-    (.getData h)))
+    (js->clj (.getData h))))
+
+(defn- get-meta
+  "Answer vector of metadata maps, one per row in order."
+  []
+  (let [h @hot n (ocall h "countRows")]
+    (map #(let [cell-meta (ocall h "getCellMeta" % 0)]
+           {:db-id (gobj/get cell-meta "db-id")
+            :provenance (gobj/get cell-meta "provenance")})
+      (range 0 n))))
+
+(defn- square-data*
+  "Answer same data (vector of vectors), each conj'd w/ nils where necessary
+   to all be same length."
+  [data]
+  (let [w (apply max (map count data))]
+    (into []
+      (map #(into % (repeat (- w (count %)) nil)) data))))
+
+(defn- append-provenance* [data meta]
+  (map #(conj %1 (:provenance %2)) data meta))
 
 (defn export-csv []
-  (let [csv (.unparse js/Papa (get-data))]
+  (let [data (append-provenance* (square-data* (get-data)) (get-meta))
+        csv (.unparse js/Papa (clj->js data))]
     (.open js/window (str "data:text/csv;charset=utf-8,"
                        (js/encodeURIComponent csv)))))
 

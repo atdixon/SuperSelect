@@ -17,8 +17,9 @@
             [zelector.content-script.debug-ui :as debug-ui]))
 
 (defn- save-buffer! [buffer]
-  (let [as-record (map :content buffer)]
-    (bgx/post-message! {:action "record" :params {:record as-record}})))
+  (let [as-record (map :content buffer)
+        provenance (.-location.href js/window)]
+    (bgx/post-message! {:action "record" :params {:record as-record :provenance provenance}})))
 
 (defn- single-rect? [range]
   (<= (count (trav/range->client-rects range)) 1))

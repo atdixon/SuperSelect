@@ -8,7 +8,7 @@
   (let [db (js/Dexie. "Zelector" #js {:autoOpen true})]
     (-> db
       (.version 1)
-      (.stores #js {:snippets "++id, record"}))
+      (.stores #js {:snippets "++id, record, provenance"}))
     db))
 
 (defonce db (create-db!))
@@ -17,9 +17,9 @@
   (gobj/get db "snippets"))
 
 ; --- write ---
-(defn add-record! [coll]
+(defn add-record! [coll provenance]
   (if-not (empty? coll)
-    (.add (get-table) (clj->js {:record coll}))))
+    (.add (get-table) (clj->js {:record coll :provenance provenance}))))
 
 (defn update-record! [db-id coll]
   (.update (get-table) db-id (clj->js {:record coll})))
@@ -38,4 +38,4 @@
   (.toArray
     (get-table)
     #(doseq [row %]
-      (cb (gobj/get row "id") (gobj/get row "record")))))
+      (cb (gobj/get row "id") (gobj/get row "record") (gobj/get row "provenance")))))
