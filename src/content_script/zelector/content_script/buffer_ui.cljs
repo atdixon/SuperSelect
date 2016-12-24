@@ -1,12 +1,27 @@
 (ns zelector.content-script.buffer-ui
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
+            [chromex.ext.extension :refer-macros [get-url]]
+            [chromex.ext.tabs :as tabs]
+            [cljs.core.async :refer [<! >! put! chan]]
+            [goog.object :as gobj]
             [om.next :as om :refer-macros [defui]]
-            [om.dom :as dom]))
+            [om.dom :as dom]
+            [zelector.common.util :as util]))
 
 (defn- css-transition-group [props children]
   (js/React.createElement
     js/React.addons.CSSTransitionGroup
     (clj->js (merge props {:children children}))))
+
+(defn- open-workspace! []
+  (let [url (get-url "workspace.html")
+        res (tabs/query (clj->js {:url url}))]
+    (go
+      (let [found-tabs (first (<! res))]
+        (if (empty? found-tabs)
+          (tabs/create (clj->js {:url url}))
+          (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))))))
 
 (defui BufferItem
   Object
@@ -20,7 +35,7 @@
             content (str (subs content 0 25)
                       "..." (subs content (- length 25)))))
         (dom/span #js {:className "zelector-buffer-item-delete fa fa-times-circle"
-                       :onClick   #(om/transact! this `[(buffer/remove {:index ~index})])})))))
+                       :onClick #(om/transact! this `[(buffer/remove {:index ~index})])})))))
 (def buffer-item (om/factory BufferItem {:keyfn :id}))
 
 (defui BufferView
@@ -41,24 +56,29 @@
                 (map-indexed
                   #(buffer-item {:index %1 :id (:id %2) :content (:content %2)})
                   buffer)))))
-        (dom/div #js {:className "zelector-action-bar"}
-          (dom/div #js {:style #js {}}
-            (dom/span #js {:style #js {:fontWeight (if active "bold" "normal")
-                                       :cursor "pointer"}
-                           :onClick #(do
+        (dom/div #js {:id "zelector-action-bar"}
+          (dom/div #js {:id "zelector-action-bar-activator"}
+            (dom/span #js {:onClick #(do
                                       (om/transact! this
                                         `[(durable/update {:z/active ~(not active)})])
                                       (when active
                                         (om/transact! this
                                           '[(z/put {:mark/mark nil})])))}
-              "Zelector")
+              (dom/span #js {:className "zelector-clickable"
+                             :style #js {:fontWeight "bold"}} "Zelector"))
             (dom/span #js {} " (Shift+Z)"))
           (dom/div #js {:style #js {:float "right"}}
             (dom/span #js {:className "zelector-action-link"
                            :title "Clear this buffer"
-                           :onClick #(clear-buffer!)} "clear")
+                           :onClick #(clear-buffer!)}
+              (dom/span #js {:className "fa fa-times"}))
+            (dom/span #js {:className "zelector-action-link"
+                           :title "Open the workspace tab"
+                           :onClick #(open-workspace!)}
+              (dom/span #js {:className "fa fa-table"}))
             (dom/span #js {:className "zelector-action-link"
                            :title "Save this buffer to the backend"
                            :onClick (fn [e]
                                       (flush-buffer-fn buffer)
-                                      (clear-buffer!))} "save")))))))
+                                      (clear-buffer!))}
+              (dom/span #js {:className "fa fa-save"}))))))))

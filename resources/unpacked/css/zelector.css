@@ -26,6 +26,7 @@
     border: 0 solid black;
     background-color: #494949;
 }
+
 .zelector-selection-text-rect {
     pointer-events: none;
     z-index: 2147483647;
@@ -37,6 +38,7 @@
     background-color: #494949;
     color: white;
 }
+
 .zelector-selection-mark-rect {
     pointer-events: none;
     z-index: 2147483647;
@@ -44,13 +46,14 @@
 
     border: solid black;
 }
+
 .zelector-selection-over-rect {
     pointer-events: none;
     z-index: 2147483647;
     position: fixed;
 
     border: solid black;
-    border-radius: 5px;
+    border-radius: 0;
 }
 
 /* buffer */
@@ -71,11 +74,13 @@
 
     cursor: default;
 }
+
 #zelector-buffer ul {
     margin: 0;
     padding: 0;
     border: 2px solid #494949;
 }
+
 #zelector-buffer li {
     display: flex;
     align-items: center;
@@ -88,9 +93,11 @@
 
     background-color: rgba(0, 0, 0, 0.6);
 }
+
 #zelector-buffer li:not(:first-child) {
     border-top: 1px dashed #a9a9a9;
 }
+
 .zelector-buffer-item-index {
     width: 12px;
     padding: 2px;
@@ -100,54 +107,75 @@
     font-family: Arial, serif;
     font-size: 12px;
     font-weight: bold;
-    /*background-color: rgb(50, 50, 50);*/
     text-align: center;
 }
+
 .zelector-buffer-item-content {
     margin: 0 10px;
     width: 300px;
 }
+
 .zelector-buffer-item-delete {
     cursor: pointer;
 }
+
 .zelector-buffer-item-enter {
     opacity: 0.01;
     max-height: 0;
 }
+
 .zelector-buffer-item-enter.zelector-buffer-item-enter-active {
     opacity: 1;
     max-height: 200px;
     transition: max-height 500ms ease-in;
 }
+
 .zelector-buffer-item-leave {
     opacity: 1;
 }
+
 .zelector-buffer-item-leave.zelector-buffer-item-leave-active {
     opacity: 0.01;
     transition: opacity 200ms ease-in;
 }
 
 /* action bar */
-#zelector-buffer .zelector-action-bar {
+#zelector-action-bar {
+    display: flex;
+    align-items: center;
+    float: right;
     user-select: none;
     border: 2px solid #494949;
     margin-top: 2px;
-    padding: 2px;
+    padding: 5px;
     font-family: Arial, serif;
     font-size: 12px;
     background-color: rgba(0, 0, 0, 0.6);
     line-height: normal;
 }
 
-#zelector-buffer .zelector-action-bar div {
+#zelector-action-bar-activator {
+    margin-right: 25px;
+}
+
+#zelector-action-bar div {
     display: inline-block;
 }
 
-#zelector-buffer .zelector-action-link {
+#zelector-action-bar .zelector-action-link {
     color: white;
+    font-size: 16px;
     text-decoration: underline;
     margin-left: 5px;
+    margin-right: 5px;
+}
+
+#zelector-action-bar .zelector-action-link, #zelector-action-bar .zelector-clickable {
     cursor: pointer;
+}
+
+#zelector-action-bar .zelector-action-link:hover, #zelector-action-bar .zelector-clickable:hover {
+    color: darkorange;
 }
 
 /* debug */

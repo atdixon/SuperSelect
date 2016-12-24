@@ -4,6 +4,7 @@
     -- evaporate content script on port disconnect??
 -- test w/ initial install (no local storage, no indexedb data)
 -- hammer test
+-- autoupdate
 -- proper way to prevent page css from affecting styles?
 -- oss w/ readme/writeup
 -- ask hn; is this useful? etc.

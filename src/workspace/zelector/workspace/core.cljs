@@ -26,7 +26,7 @@
               :data [[""]]
               :minRows 0
               :rowHeaders true
-              :colHeaders true
+              :colHeaders false
               :stretchH "all"
               :colWidths 100
               :wordWrap false
@@ -84,16 +84,17 @@
 (defn export-csv []
   (let [csv (.unparse js/Papa (get-data))]
     (.open js/window (str "data:text/csv;charset=utf-8,"
-                          (js/encodeURIComponent csv)))))
+                       (js/encodeURIComponent csv)))))
 
 ; --- init ---
 (defn- bind-handlers! []
   (.bind (j/$ "#download") "click.zelector" #(export-csv))
   (.bind (j/$ "#clear") "click.zelector"
-         #(do (db/clear-db!)
-              (reinstall-table!)
-              (bgx/post-message! {:action "refresh"
-                                  :params {:resource ["badge"]}}))))
+    #(when (.confirm js/window "Are you sure?")
+      (db/clear-db!)
+      (reinstall-table!)
+      (bgx/post-message! {:action "refresh"
+                          :params {:resource ["badge"]}}))))
 
 (defn- unbind-handlers! []
   (.unbind (j/$ "#download") "click.zelector")
