@@ -7,7 +7,9 @@
             [chromex.ext.extension :refer-macros [get-url]]
             [chromex.ext.storage :as storage]
             [chromex.ext.browser-action :refer-macros [set-badge-text]]
-            [cljs.core.async :refer [<! chan]]
+            [chromex.ext.tabs :as tabs]
+            [cljs.core.async :refer [<! >! put! chan]]
+            [goog.object :as gobj]
             [goog.string :as gstring]
             [goog.string.format]
             [zelector.common.util :as util]
@@ -30,6 +32,16 @@
 ; --- db ---
 (defn refresh-badge-text! []
   (db/count-table #(set-badge-text #js {:text (str %)})))
+
+; --- actions ---
+(defn- open-workspace! []
+  (let [url (get-url "workspace.html")
+        res (tabs/query (clj->js {:url url}))]
+    (go
+      (let [found-tabs (first (<! res))]
+        (if (empty? found-tabs)
+          (tabs/create (clj->js {:url url}))
+          (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))))))
 
 ; --- local storage ---
 (defn get-stored-keys
@@ -61,6 +73,7 @@
 ;             z/active: true}}
 ;   {action: "refresh",
 ;    params: {resource: ["badge"]}}
+;   {action: "workspace"}
 ;
 ; (Empty params for "config" answers all known config properties to
 ; client.)
@@ -88,7 +101,8 @@
                      (set-stored-keys! params))
           "refresh" (doseq [res (:resource params)]
                       (case res
-                        "badge" (refresh-badge-text!)))))
+                        "badge" (refresh-badge-text!)))
+          "workspace" (open-workspace!)))
       (recur))
     (remove-client! client)))
 

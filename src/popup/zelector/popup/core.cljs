@@ -2,9 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
             [chromex.ext.extension :refer-macros [get-url]]
-            [chromex.ext.tabs :as tabs]
             [cljs.core.async :refer [<! >! put! chan]]
-            [goog.object :as gobj]
             [goog.dom :as gdom]
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
@@ -18,15 +16,7 @@
 
 ; --- actions ---
 (defn- open-workspace! []
-  (let [url (get-url "workspace.html")
-        res (tabs/query (clj->js {:url url}))]
-    (go
-      (let [found-tabs (first (<! res))]
-        (if (empty? found-tabs)
-          (tabs/create (clj->js {:url url}))
-          (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))
-        ; close popup only after async open-workspace command succeeds
-        (close-popup!)))))
+  (bgx/post-message! {:action "workspace"}))
 
 ; --- state ---
 ;   assume z/enabled true until proven otherwise; om/next
@@ -76,7 +66,7 @@
                           (dom/span #js {:className "fa fa-check"}) "Enabled")
                   (dom/li #js {:onClick #(om/transact! this '[(z/update {:z/enabled true})])}
                           (dom/span #js {:className "fa fa-times"}) "Disabled"))
-                (dom/li #js {:onClick #(open-workspace!)}
+                (dom/li #js {:onClick #((open-workspace!) (close-popup!))}
                         (dom/span #js {:className "fa fa-table"}) "Go to Workspace"))))))
 
 (def parser

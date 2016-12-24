@@ -162,12 +162,18 @@
     display: inline-block;
 }
 
+#zelector-action-bar .zelector-separator {
+    color: #a9a9a9;
+}
+
+#zelector-action-bar .zelector-actions {
+    font-size: 15px;
+}
+
 #zelector-action-bar .zelector-action-link {
     color: white;
-    font-size: 16px;
     text-decoration: underline;
-    margin-left: 5px;
-    margin-right: 5px;
+    margin-left: 10px;
 }
 
 #zelector-action-bar .zelector-action-link, #zelector-action-bar .zelector-clickable {

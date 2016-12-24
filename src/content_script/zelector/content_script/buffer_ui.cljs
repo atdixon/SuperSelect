@@ -1,13 +1,8 @@
 (ns zelector.content-script.buffer-ui
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
-            [chromex.ext.extension :refer-macros [get-url]]
-            [chromex.ext.tabs :as tabs]
-            [cljs.core.async :refer [<! >! put! chan]]
-            [goog.object :as gobj]
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
-            [zelector.common.util :as util]))
+            [zelector.common.bgx :as bgx]))
 
 (defn- css-transition-group [props children]
   (js/React.createElement
@@ -15,13 +10,7 @@
     (clj->js (merge props {:children children}))))
 
 (defn- open-workspace! []
-  (let [url (get-url "workspace.html")
-        res (tabs/query (clj->js {:url url}))]
-    (go
-      (let [found-tabs (first (<! res))]
-        (if (empty? found-tabs)
-          (tabs/create (clj->js {:url url}))
-          (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))))))
+  (bgx/post-message! {:action "workspace"}))
 
 (defui BufferItem
   Object
@@ -67,18 +56,19 @@
               (dom/span #js {:className "zelector-clickable"
                              :style #js {:fontWeight "bold"}} "Zelector"))
             (dom/span #js {} " (Shift+Z)"))
-          (dom/div #js {:style #js {:float "right"}}
-            (dom/span #js {:className "zelector-action-link"
-                           :title "Clear this buffer"
-                           :onClick #(clear-buffer!)}
-              (dom/span #js {:className "fa fa-times"}))
-            (dom/span #js {:className "zelector-action-link"
-                           :title "Open the workspace tab"
-                           :onClick #(open-workspace!)}
-              (dom/span #js {:className "fa fa-table"}))
+          (dom/div #js {:className "zelector-actions"
+                        :style #js {:float "right"}}
             (dom/span #js {:className "zelector-action-link"
                            :title "Save this buffer to the backend"
                            :onClick (fn [e]
                                       (flush-buffer-fn buffer)
                                       (clear-buffer!))}
-              (dom/span #js {:className "fa fa-save"}))))))))
+              (dom/span #js {:className "fa fa-save"}))
+            (dom/span #js {:className "zelector-action-link"
+                           :title "Clear this buffer"
+                           :onClick #(clear-buffer!)}
+              (dom/span #js {:className "fa fa-trash"}))
+            (dom/span #js {:className "zelector-action-link"
+                           :title "Open the workspace tab"
+                           :onClick #(open-workspace!)}
+              (dom/span #js {:className "fa fa-external-link"}))))))))
