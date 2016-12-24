@@ -1,5 +1,3 @@
--- stylin'
--- click to disable/enable. workspace opens from action bar. no popup. title text = Enable|Disable Zelector
 -- handling port disconnects (e.g. bg cxns clients)
     -- evaporate content script on port disconnect??
 -- test w/ initial install (no local storage, no indexedb data)
@@ -8,7 +6,9 @@
 -- proper way to prevent page css from affecting styles?
 -- oss w/ readme/writeup
 -- ask hn; is this useful? etc.
+-- critique hn.
     - ucs: note taking, semantic blog extract, vocab/dictionary, pl learning, cocktails/recipes, ml training, flash cards, etc.
+-- om/nexters
 -- only after hn, do any extra mktg or what have you
 -- MOVE ON
 
