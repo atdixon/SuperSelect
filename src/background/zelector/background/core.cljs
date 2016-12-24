@@ -6,7 +6,7 @@
             [chromex.ext.runtime :as runtime]
             [chromex.ext.extension :refer-macros [get-url]]
             [chromex.ext.storage :as storage]
-            [chromex.ext.browser-action :refer-macros [set-badge-text]]
+            [chromex.ext.browser-action :as action :refer-macros [set-badge-text]]
             [chromex.ext.tabs :as tabs]
             [cljs.core.async :refer [<! >! put! chan]]
             [goog.object :as gobj]

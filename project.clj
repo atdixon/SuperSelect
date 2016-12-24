@@ -23,7 +23,6 @@
 
   :source-paths ["src/common"
                  "src/background"
-                 "src/popup"
                  "src/content_script"
                  "src/workspace"
                  "src/sandbox"]
@@ -46,22 +45,6 @@
                              :asset-path "compiled/background"
                              :preloads [devtools.preload]
                              :main zelector.background
-                             :optimizations :none
-                             :source-map true
-                             :externs ["foreign-lib/dexie/dexie-externs.js"
-                                       "foreign-lib/handsontable/handsontable-externs.js"]
-                             :foreign-libs [{:file "foreign-lib/dexie/dexie.js"
-                                             :provides ["dexie"]}
-                                            {:file "foreign-lib/handsontable/handsontable.full.js"
-                                             :provides ["handsontable"]}]}}
-                 {:id "popup"
-                  :source-paths ["src/popup" "src/common"]
-                  :figwheel {:on-jsload "zelector.popup.core/fig-reload-hook"}
-                  :compiler {:output-to "resources/unpacked/compiled/popup/main.js"
-                             :output-dir "resources/unpacked/compiled/popup"
-                             :asset-path "compiled/popup"
-                             :preloads [devtools.preload]
-                             :main zelector.popup
                              :optimizations :none
                              :source-map true
                              :externs ["foreign-lib/dexie/dexie-externs.js"
@@ -147,21 +130,6 @@
                                             {:file "foreign-lib/handsontable/handsontable.full.min.js"
                                              :provides ["handsontable"]}]
                              :language-in :ecmascript5 :language-out :ecmascript5}}
-                 {:id "popup"
-                  :source-paths ["src/popup" "src/common"]
-                  :compiler {:output-to "resources/release/compiled/popup.js"
-                             :output-dir "resources/release/compiled/popup"
-                             :asset-path "compiled/popup"
-                             :main zelector.popup
-                             :optimizations :advanced
-                             :elide-asserts true
-                             :externs ["foreign-lib/dexie/dexie-externs.js"
-                                       "foreign-lib/handsontable/handsontable-externs.js"]
-                             :foreign-libs [{:file "foreign-lib/dexie/dexie.min.js"
-                                             :provides ["dexie"]}
-                                            {:file "foreign-lib/handsontable/handsontable.full.min.js"
-                                             :provides ["handsontable"]}]
-                             :language-in :ecmascript5 :language-out :ecmascript5}}
                  {:id "workspace"
                   :source-paths ["src/workspace" "src/common"]
                   :compiler {:output-to "resources/release/compiled/workspace.js"
@@ -196,9 +164,9 @@
 
   :aliases {"dev-build" ["with-profile" "+unpacked,+unpacked-content-script" "cljsbuild" "once"]
             "content-dev" ["with-profile" "+unpacked-content-script" "cljsbuild" "auto" "content-script"]
-            "fig-dev" ["with-profile" "+unpacked,+figwheel" "figwheel" "background" "popup" "workspace"]
+            "fig-dev" ["with-profile" "+unpacked,+figwheel" "figwheel" "background" "workspace"]
             "sandbox" ["with-profile" "+sandbox,+figwheel" "figwheel" "sandbox"]
             "release" ["with-profile" "+release" "do"
                        ["clean"]
-                       ["cljsbuild" "once" "background" "popup" "workspace" "content-script"]]
+                       ["cljsbuild" "once" "background" "workspace" "content-script"]]
             "package" ["shell" "scripts/package.sh"]})
