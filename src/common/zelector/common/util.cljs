@@ -7,8 +7,7 @@
 
 ; --- basic ---
 (defn any [coll]
-  "Answers any item from coll. If coll is nil,
-  returns nil."
+  "Answers any item from coll. If coll is nil, returns nil."
   (first coll))
 
 (defn not-blank [str]
@@ -26,6 +25,11 @@
       (re-matches
         #"[\u2000-\u206F\u2E00-\u2E7F\\'!\"#$%&()*+,\-./:;<=>?@\[\]^_`{|}~]"
         (str ch)))))
+
+(defn quotey-char?
+  "Punctuation that are part of left/right pairs, e.g. quotes, parens, etc."
+  [ch]
+  (not (nil? (re-matches #"[()<>{}\[\]|'\"\u201c\u201d\u2018\u2019]" (str ch)))))
 
 (defn resettable-memoize [f]
   (let [mem (atom {})]

@@ -80,11 +80,12 @@
     (let [[[items] err] (<! (get-stored-keys [:z/enabled]))]
       (when-not err
         (let [{:keys [z/enabled]} (util/js->clj* items)]
-          (set-stored-keys! {:z/enabled (not enabled)})
+          ; note: always clear active state when we toggle enabled
+          (set-stored-keys! {:z/enabled (not enabled) :z/active false})
           (refresh-badge!))))))
 
 ; --- client event loop ---
-; NOTE: Our background "API" supports, e.g.:
+; NOTE: Our background "api" supports, e.g.:
 ;
 ;   {action: "record",
 ;    params: {record: []}}

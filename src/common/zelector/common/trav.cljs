@@ -230,6 +230,21 @@
   ([root [sc ec] while-pred]
    [sc (+position-while root ec :right #(while-pred (:char %)))]))
 
+(defn grow-rangel
+  "Grow range to the left per char predicate."
+  ([range while-pred] (grow-rangel nil range while-pred))
+  ([root [sc ec] while-pred]
+   [(inc-position
+      (+position-while root (dec-position sc) :left #(while-pred (:char %)))) ec]))
+
+(defn grow-range
+  "Grow range in both directions per char predicate."
+  ([range while-pred] (grow-range nil range while-pred))
+  ([root range while-pred]
+   (as-> range r
+     (grow-ranger root r while-pred)
+     (grow-rangel root r while-pred))))
+
 (defn text-node->range
   "Produce range [[<container> <offset>] [<container> <offset>]] given
   text node and optionally start and end offsets."

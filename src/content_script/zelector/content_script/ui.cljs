@@ -1,6 +1,7 @@
 (ns zelector.content-script.ui
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
+            [clojure.data :as data]
             [cljs.core.async :refer [<! >! put! chan]]
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
@@ -35,8 +36,16 @@
           ; split ranges until none have > 1 client rects
           (trav/partition-range-with* range single-rect?))))))
 
-(defn- combine-ranges* [mark over]
-  (trav/grow-ranger (trav/combine-ranges mark over) util/punctuation-char?))
+(defn- combine-ranges*
+  "Strategy for combining mark...over, including heuristics to incorporate or
+  exclude punctuation at ends of combination etc."
+  [mark over]
+  (if (= mark over)
+    mark
+    (let [combined (trav/combine-ranges mark over)
+          grown-r (trav/grow-ranger combined #(or (util/quotey-char? %) (= % ".")))]
+      (if (not= combined grown-r)
+        (trav/grow-rangel grown-r #(or (util/quotey-char? %) (= % "."))) grown-r))))
 
 (defn- reset-memoizations!
   "Reset memoization state for fns that are sensitive to window dimensions, etc."
@@ -169,17 +178,16 @@
       (bind js/window "resize.zelector" #(reset-memoizations!))
       (bind js/window "scroll.zelector" #(.forceUpdate this))
       (bind js/document "keydown.zelector"
-            (fn [e]
-              (let [{{:keys [:z/active]} :durable} (om/props this)
-                    inp? (util/input-node? (.-target e))
-                    z-key? (and (= (.toLowerCase (.-key e)) "z") (.-shiftKey e))
-                    esc-key? (= (.-keyCode e) 27)
-                    clear-mark! #(om/transact! this '[(z/put {:mark/mark nil})])]
-                (when (and active esc-key?)
-                  (clear-mark!))
-                (when (and z-key? (or active (not inp?)))
-                  (when active (clear-mark!))
-                  (om/transact! this `[(durable/update {:z/active ~(not active)})])))))))
+        (fn [e]
+          (let [{{:keys [:z/active]} :durable} (om/props this)
+                inp? (util/input-node? (.-target e))
+                z-key? (and (= (.toLowerCase (.-key e)) "z") (.-shiftKey e))
+                esc-key? (= (.-keyCode e) 27)]
+            ; ux, any update to z/active and we clear mark
+            (if esc-key?
+              (om/transact! this '[(durable/update {:z/active false}) (z/put {:mark/mark nil})]))
+            (if (and z-key? (or active (not inp?)))
+              (om/transact! this `[(durable/update {:z/active ~(not active)}) (z/put {:mark/mark nil})])))))))
   (componentWillUnmount [this]
     (-> js/window j/$ (.unbind ".zelector"))
     (-> js/document j/$ (.unbind ".zelector")))
@@ -227,6 +235,18 @@
      :remotes [:durable]}))
 
 ; --- background ---
+(defn- handle-config-delta!
+  "Handle durable config changes coming from the bg. This involves
+  updating our state as well as ensuring other state changes that
+  should be affected (e.g., clearing marks, etc.)"
+  [durable-config]
+  (let [st (deref (om.next/app-state reconciler))
+        chg (first (data/diff durable-config (:durable st)))]
+    (om.next/merge! reconciler
+      (merge {:durable durable-config}
+        (if (some false? [(:z/enabled chg) (:z/active chg)])
+          {:mark/mark nil})))))
+
 ; handle messages like, e.g.,
 ;   {action: "config",
 ;    params: {z/enabled: true,
@@ -236,7 +256,7 @@
 (defn- handle-message! [msg]
   (let [{:keys [action params]} (util/js->clj* msg)]
     (case action
-      "config" (om.next/merge! reconciler {:durable params})
+      "config" (handle-config-delta! params)
       nil)))
 
 (defn- backgound-connect! []
