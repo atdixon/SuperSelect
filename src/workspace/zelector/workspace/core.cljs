@@ -17,7 +17,7 @@
             [zelector.common.bgx :as bgx]))
 
 ; --- workspace ---
-(defonce hot (atom nil))
+(defonce ^:private hot (atom nil))
 
 (defn- create-table []
   (js/Handsontable.
@@ -152,6 +152,7 @@
 
 (defn init! []
   (log "workspace: init")
+  (db/init!)
   (install-table!)
   (load-table-data!)
   (bind-handlers!)

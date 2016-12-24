@@ -4,17 +4,26 @@
             [dexie]
             [zelector.common.util]))
 
+; -- db --
+(def db-name "Zelector")
+(defonce ^:private db (atom nil))
+
 (defn- create-db! []
-  (let [db (js/Dexie. "Zelector" #js {:autoOpen true})]
-    (-> db
+  (let [d (js/Dexie. db-name #js {:autoOpen true})]
+    (-> d
       (.version 1)
       (.stores #js {:snippets "++id, record, provenance"}))
-    db))
-
-(defonce db (create-db!))
+    (reset! db d)))
 
 (defn- get-table []
-  (gobj/get db "snippets"))
+  (gobj/get @db "snippets"))
+
+(defn init! []
+  (create-db!))
+
+; --- *DANGER* ---
+(defn delete-db!! []
+  (.delete @db))
 
 ; --- write ---
 (defn add-record! [coll provenance]

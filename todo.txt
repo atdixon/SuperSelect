@@ -1,7 +1,5 @@
--- easy mark clear
--- test w/ initial install (no local storage, no indexedb data)
-    -- updating and dexie db schemas??
 -- hammer test
+    -- zelector.background.core.clear_all_durable_STAR__BANG__BANG_.call()
 -- autoupdate
 -- proper way to prevent page css from affecting styles?
 -- oss w/ readme/writeup
@@ -13,6 +11,8 @@
 -- MOVE ON
 
 future
+-- on upg. updating idxdb schemas v dex.??
+-- easy mark clear (shift+click on mark?)
 -- when pushing combined range to buffer, collapse whitespace, convert p, br *c to newlines
 -- sticky buffer surviving refreshes and navigations
 -- bg port disconnect scenarios (eg on plugin update, ...others?)

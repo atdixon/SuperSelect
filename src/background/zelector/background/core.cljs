@@ -2,7 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
             [chromex.chrome-event-channel :refer [make-chrome-event-channel]]
-            [chromex.protocols :refer [post-message! get-sender] :as proto]
+            [chromex.protocols :refer [post-message! get-sender clear] :as proto]
             [chromex.ext.runtime :as runtime]
             [chromex.ext.extension :refer-macros [get-url]]
             [chromex.ext.storage :as storage]
@@ -15,6 +15,11 @@
             [goog.string.format]
             [zelector.common.util :as util]
             [zelector.common.db :as db]))
+
+; --- *DANGER* ---
+(defn- clear-all-durable*!! []
+  (clear (storage/get-local))
+  (db/delete-db!!))
 
 ; --- client mgmt ---
 (defonce clients (atom []))
@@ -158,5 +163,6 @@
 
 ; --- init ---
 (defn init! []
+  (db/init!)
   (boot-event-loop!)
   (refresh-badge!))
