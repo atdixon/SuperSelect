@@ -45,9 +45,9 @@
                                 (this-as this
                                   (if-not (#{"clear-table"} source)
                                     (doseq [row logical-rows]
-                                      (let [cell-meta (ocall this "getCellMeta" row 0)
-                                            db-id (gobj/get cell-meta "db-id")]
-                                        (db/delete-record! db-id))))))})))
+                                      (let [cell-meta (ocall this "getCellMeta" row 0)]
+                                        (if-let [db-id (gobj/get cell-meta "db-id")]
+                                          (db/delete-record! db-id)))))))})))
 
 (defn- install-table! []
   (reset! hot (create-table)))

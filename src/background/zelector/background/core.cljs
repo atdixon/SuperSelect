@@ -6,7 +6,8 @@
             [chromex.ext.runtime :as runtime]
             [chromex.ext.extension :refer-macros [get-url]]
             [chromex.ext.storage :as storage]
-            [chromex.ext.browser-action :as action :refer-macros [set-badge-text]]
+            [chromex.ext.browser-action :as action
+             :refer-macros [set-icon set-title set-badge-text set-badge-background-color]]
             [chromex.ext.tabs :as tabs]
             [cljs.core.async :refer [<! >! put! chan]]
             [goog.object :as gobj]
@@ -29,20 +30,6 @@
   (doseq [client @clients]
     (post-message! client (clj->js msg))))
 
-; --- db ---
-(defn refresh-badge-text! []
-  (db/count-table #(set-badge-text #js {:text (str %)})))
-
-; --- actions ---
-(defn- open-workspace! []
-  (let [url (get-url "workspace.html")
-        res (tabs/query (clj->js {:url url}))]
-    (go
-      (let [found-tabs (first (<! res))]
-        (if (empty? found-tabs)
-          (tabs/create (clj->js {:url url}))
-          (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))))))
-
 ; --- local storage ---
 (defn get-stored-keys
   "Get value for a key/s (a vector of keywords), answer
@@ -62,6 +49,39 @@
     (let [[[items] err] (<! (get-stored-keys [:z/enabled :z/active]))]
       (when-not err
         (message-clients*! {:action "config" :params items})))))
+
+; --- actions ---
+(defn refresh-badge! []
+  (go
+    (let [[[items] err] (<! (get-stored-keys [:z/enabled]))]
+      (when-not err
+        (let [{:keys [z/enabled]} (util/js->clj* items)]
+          (if enabled
+            (do
+              (set-title #js {:title "Disable Zelector"})
+              (db/count-table #(set-badge-text #js {:text (str %)}))
+              (set-badge-background-color #js {:color "darkorange"}))
+            (do
+              (set-title #js {:title "Enable Zelector"})
+              (set-badge-text #js {:text ""})
+              (set-badge-background-color #js {:color #js [0 0 0 0]}))))))))
+
+(defn- open-workspace! []
+  (let [url (get-url "workspace.html")
+        res (tabs/query (clj->js {:url url}))]
+    (go
+      (let [found-tabs (first (<! res))]
+        (if (empty? found-tabs)
+          (tabs/create (clj->js {:url url}))
+          (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))))))
+
+(defn toggle-enabled! []
+  (go
+    (let [[[items] err] (<! (get-stored-keys [:z/enabled]))]
+      (when-not err
+        (let [{:keys [z/enabled]} (util/js->clj* items)]
+          (set-stored-keys! {:z/enabled (not enabled)})
+          (refresh-badge!))))))
 
 ; --- client event loop ---
 ; NOTE: Our background "API" supports, e.g.:
@@ -95,13 +115,13 @@
                      (db/add-record! (:record params))
                      (message-clients*! {:action "refresh"
                                          :resource ["db"]})
-                     (refresh-badge-text!))
+                     (refresh-badge!))
           "config" (if (empty? params)
                      (broadcast-stored-keys!)
                      (set-stored-keys! params))
           "refresh" (doseq [res (:resource params)]
                       (case res
-                        "badge" (refresh-badge-text!)))
+                        "badge" (refresh-badge!)))
           "workspace" (open-workspace!)))
       (recur))
     (remove-client! client)))
@@ -118,6 +138,7 @@
     (case event-id
       ::runtime/on-connect (apply handle-client-connection! args)
       ::storage/on-changed (broadcast-stored-keys!) ; broadcast all, making client's merge! reconcilation more direct for now.
+      ::action/on-clicked (toggle-enabled!)
       nil)))
 
 (defn run-event-loop! [ch]
@@ -131,9 +152,10 @@
     (runtime/tap-on-connect-events ch)
     (runtime/tap-on-message-events ch)
     (storage/tap-on-changed-events ch)
+    (action/tap-all-events ch)
     (run-event-loop! ch)))
 
 ; --- init ---
 (defn init! []
   (boot-event-loop!)
-  (refresh-badge-text!))
+  (refresh-badge!))

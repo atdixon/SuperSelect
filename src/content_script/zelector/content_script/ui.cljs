@@ -185,8 +185,7 @@
     (-> js/document j/$ (.unbind ".zelector")))
   (render [this]
     (let [{:keys [:mark/ch :mark/over :mark/mark :flag/frozen :buffer]} (om/props this)
-          {{:keys [:z/enabled :z/active]
-            :or {enabled zcore/default-enabled active zcore/default-active}} :durable} (om/props this)
+          {{:keys [:z/enabled :z/active] :or {enabled false active false}} :durable} (om/props this)
           combined (if (and mark over) (combine-ranges* mark over))]
       (if enabled
         (dom/div nil

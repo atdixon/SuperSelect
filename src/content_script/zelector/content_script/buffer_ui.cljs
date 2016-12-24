@@ -71,4 +71,4 @@
             (dom/span #js {:className "zelector-action-link"
                            :title "Open the workspace tab"
                            :onClick #(open-workspace!)}
-              (dom/span #js {:className "fa fa-external-link"}))))))))
+              (dom/span #js {:className "fa fa-external-link-square"}))))))))
