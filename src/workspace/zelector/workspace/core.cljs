@@ -98,8 +98,7 @@
    to all be same length."
   [data]
   (let [w (apply max (map count data))]
-    (into []
-      (map #(into % (repeat (- w (count %)) nil)) data))))
+    (mapv #(into % (repeat (- w (count %)) nil)) data)))
 
 (defn- append-provenance* [data meta]
   (map #(conj %1 (:provenance %2)) data meta))

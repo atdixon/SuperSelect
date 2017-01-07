@@ -44,9 +44,9 @@
   (if (= mark over)
     mark
     (let [combined (trav/combine-ranges mark over)
-          grown-r (trav/grow-ranger combined #(or (util/quotey-char? %) (= % ".")))]
+          grown-r (trav/grow-ranger combined #(or (util/quotey-char? %) (util/punctuation-char? %)))]
       (if (not= combined grown-r)
-        (trav/grow-rangel grown-r #(or (util/quotey-char? %) (= % "."))) grown-r))))
+        (trav/grow-rangel grown-r util/quotey-char?) grown-r))))
 
 (defn- reset-memoizations!
   "Reset memoization state for fns that are sensitive to window dimensions, etc."
@@ -243,6 +243,9 @@
   [durable-config]
   (let [st (deref (om.next/app-state reconciler))
         chg (first (data/diff durable-config (:durable st)))]
+    ; merge! wipes out root properties, so until we customize merging
+    ;   we are relying on incoming config delta/object containing full
+    ;   set of known durable props.
     (om.next/merge! reconciler
       (merge {:durable durable-config}
         (if (some false? [(:z/enabled chg) (:z/active chg)])
@@ -279,7 +282,8 @@
 
 ; --- for sandbox ---
 (defn init-basic!
-  "Init bg-less, i.e., w/o a browser extension env."
+  "Init headless (feetless?), i.e., w/o a background page or browser
+  extension environment."
   []
   (bgx/connect-null!)
   (om.next/merge! reconciler {:durable {:z/enabled true :z/active true}})
