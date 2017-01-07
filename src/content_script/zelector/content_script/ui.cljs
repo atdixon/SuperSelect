@@ -1,11 +1,14 @@
 (ns zelector.content-script.ui
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
+            [chromex.ext.extension :refer-macros [get-url]]
             [clojure.data :as data]
             [cljs.core.async :refer [<! >! put! chan]]
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
             [goog.dom :as gdom]
+            [goog.string :as gstr]
+            [goog.string.format]
             [cljsjs.jquery]
             [jayq.core :as j]
             [zelector.common.core :as zcore]
@@ -107,7 +110,7 @@
       (trav/range->client-rects mark))))
 
 (defn- over-els
-  "Render 'over'. "
+  "Render 'over'."
   [this & {:keys [over]}]
   (if over
     (map-indexed
@@ -271,14 +274,33 @@
         (recur)))))
 
 ; --- lifecycle ---
-(defn- install-glass-mount! []
-  (-> (j/$ "<div id=\"zelector-glass-mount\">")
+(def ^:dynamic *css-url-fa* "css/fa/css/font-awesome.min.css")
+(def ^:dynamic *css-url-ze* "css/zelector.css")
+
+(defn- install-glass-host! []
+  (-> (j/$ "<div id=\"zelector-glass-host\">")
     (.appendTo "body")
-    (aget 0)))
+    (aget 0))) ; (.attachShadow #js {:mode "closed"}) note: react hates the shadow dom.
+
+(defn- install-css! [root-elem]
+  (let [templ "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"]
+    (doto (j/$ root-elem)
+      (.append (gstr/format templ *css-url-fa*))
+      (.append (gstr/format templ *css-url-ze*)))))
+
+(defn- install-glass-mount! [root-elem]
+  (do
+    (install-css! root-elem)
+    (-> (j/$ "<div id=\"zelector-glass-mount\">")
+      (.appendTo (j/$ root-elem))
+      (aget 0))))
 
 (defn init! []
   (backgound-connect!)
-  (om/add-root! reconciler Zelector (install-glass-mount!)))
+  (binding [*css-url-fa* (get-url "css/fa/css/font-awesome-chrome-ext.min.css")
+            *css-url-ze* (get-url "css/zelector.css")]
+    (om/add-root! reconciler Zelector
+      (install-glass-mount! (install-glass-host!)))))
 
 ; --- for sandbox ---
 (defn init-basic!
@@ -287,9 +309,11 @@
   []
   (bgx/connect-null!)
   (om.next/merge! reconciler {:durable {:z/enabled true :z/active true}})
-  (om/add-root! reconciler Zelector (install-glass-mount!)))
+  (om/add-root! reconciler Zelector
+    (install-glass-mount! (install-glass-host!))))
 
 (defn destroy-basic! []
-  (let [mount (gdom/getElement "zelector-glass-mount")]
+  (let [host (gdom/getElement "zelector-glass-host")
+        mount (gdom/getElement "zelector-glass-mount")]
     (om/remove-root! reconciler mount)
-    (gdom/removeNode mount)))
+    (gdom/removeNode host)))

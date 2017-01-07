@@ -78,11 +78,14 @@
   (db/each-record #(add-row! %1 %2 %3)))
 
 ; --- export ---
+(defn- table-empty? []
+  (ocall @hot "isEmptyRow" 0))
+
 (defn- get-data
   "Answer vector of vectors (rows) in order."
   []
   (let [h @hot]
-    (js->clj (.getData h))))
+    (js->clj (ocall h "getData"))))
 
 (defn- get-meta
   "Answer vector of metadata maps, one per row in order."
@@ -103,15 +106,26 @@
 (defn- append-provenance* [data meta]
   (map #(conj %1 (:provenance %2)) data meta))
 
+(defn- with-headers*
+  "Prepends a 'header' row to data, the last column header being 'source'."
+  [data]
+  (let [w (count (first data))
+        header-row (vec (concat (map str (range 0 (dec w))) '("source")))]
+    (into [header-row] data)))
+
 (defn export-csv []
-  (let [data (append-provenance* (square-data* (get-data)) (get-meta))
+  (let [data (-> (get-data) square-data* (append-provenance* (get-meta)) with-headers*)
         csv (.unparse js/Papa (clj->js data))]
     (.open js/window (str "data:text/csv;charset=utf-8,"
                        (js/encodeURIComponent csv)))))
 
 ; --- init ---
 (defn- bind-handlers! []
-  (.bind (j/$ "#download") "click.zelector" #(export-csv))
+  (.bind (j/$ "#download") "click.zelector" (fn [e]
+                                              (if (table-empty?)
+                                                (.alert js/window
+                                                  "There is no data yet to export.")
+                                                (export-csv))))
   (.bind (j/$ "#clear") "click.zelector"
     #(when (.confirm js/window "Are you sure?")
       (db/clear-db!)

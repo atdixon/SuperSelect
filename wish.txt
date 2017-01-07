@@ -1,8 +1,9 @@
+-- chrome.commands https://developer.chrome.com/extensions/commands
 -- hammer test
     -- zelector.background.core.clear_all_durable_STAR__BANG__BANG_.call()
--- autoupdate
 -- proper way to prevent page css from affecting styles?
--- oss w/ readme/writeup
+-- autoupdate
+-- oss w/ readme/writeup, license
 -- ask hn; is this useful? etc.
 -- critique hn.
     - ucs: note taking, semantic blog extract, vocab/dictionary, pl learning, cocktails/recipes, ml training, flash cards, etc.
@@ -10,9 +11,12 @@
 -- only after hn, do any extra mktg or what have you
 -- MOVE ON
 
+-- content script to use shadow dom; but first need to get react to play shadow games.
+
 future
--- on upg. updating idxdb schemas v dex.??
+-- direct integration with google sheets
 -- easy mark clear (shift+click on mark?)
+-- on upgrade, updating indexeddb schemas v dexie??
 -- when pushing combined range to buffer, collapse whitespace, convert p, br *c to newlines
 -- sticky buffer surviving refreshes and navigations
 -- bg port disconnect scenarios (eg on plugin update, ...others?)
@@ -40,7 +44,6 @@ other
 -- O/n of traversals
 -- reconnect to bg page after extension refresh/update!
 -- save-buffer! and other buffer ops handled via remotes
--- when to use #shadow-dom
 -- lose jquery, use goog.dom,*; document.querySelector(), etc.
 -- lose dexie
 -- react devtools?
