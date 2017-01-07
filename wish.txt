@@ -1,4 +1,3 @@
--- chrome.commands https://developer.chrome.com/extensions/commands
 -- hammer test
     -- zelector.background.core.clear_all_durable_STAR__BANG__BANG_.call()
 -- proper way to prevent page css from affecting styles?
@@ -12,6 +11,7 @@
 -- MOVE ON
 
 -- content script to use shadow dom; but first need to get react to play shadow games.
+-- chrome.commands https://developer.chrome.com/extensions/commands
 
 future
 -- direct integration with google sheets
