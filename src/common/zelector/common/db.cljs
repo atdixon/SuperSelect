@@ -5,7 +5,7 @@
             [zelector.common.util]))
 
 ; -- db --
-(def db-name "Zelector")
+(def db-name "SuperSelect")
 (defonce ^:private db (atom nil))
 
 (defn- create-db! []
