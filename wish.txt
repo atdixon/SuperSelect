@@ -1,3 +1,4 @@
+-- no trash can, better clearer icon
 -- hammer test
     -- zelector.background.core.clear_all_durable_STAR__BANG__BANG_.call()
 -- proper way to prevent page css from affecting styles?

@@ -1,6 +1,6 @@
 // dev-only manifest; dev files; and unsafe eval enabled for figwheel.
 {
-  "name": "Zelector",
+  "name": "SuperSelect",
   "version": "0.0.1",
   "browser_action": {
     "default_icon": {
@@ -22,10 +22,6 @@
       "matches": [
         "http://*/*",
         "https://*/*"
-      ],
-      "css": [
-        "css/fa/css/font-awesome-chrome-ext.min.css",
-        "css/zelector.css"
       ],
       "js": [
         "compiled/content-script/main.js"
