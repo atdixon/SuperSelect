@@ -48,18 +48,16 @@
                   buffer)))))
         (dom/div #js {:id "zelector-action-bar" :className (if active "zelector-active" "zelector-inactive")}
           (dom/div #js {:id "zelector-action-bar-activator"
-                        :title (str/join " " [(if active "Deactivate" "Activate") "SuperSelect (Shift+Z)"])}
+                        :title (str/join " " [(if active "Deactivate" "Activate") "Overlay (Shift+Z)"])}
             (dom/span #js {:onClick #(do
                                       (om/transact! this
                                         `[(durable/update {:z/active ~(not active)})])
                                       (when active
                                         (om/transact! this
                                           '[(z/put {:mark/mark nil})])))}
-              (dom/span #js {:className "zelector-text"
-                             :style #js {:fontWeight "bold" :marginRight 5}} "SuperSelect")
               (dom/span #js {:className (str/join " "
-                                          ["zelector-toggler" (if active "fa fa-toggle-on" "fa fa-toggle-off")])
-                             :style #js {:fontWeight "bold"}})))
+                                          ["zelector-toggler" (if active "fa fa-toggle-on" "fa fa-toggle-off")])})
+              (dom/span #js {:className "zelector-text"} "Overlay:" (if active "On" "Off"))))
           (dom/div #js {:className "zelector-actions"
                         :style #js {:float "right"}}
             (when-not (empty? buffer)

@@ -69,9 +69,9 @@
               (set-badge-background-color #js {:color "gray"}))
             (do
               (set-title #js {:title "Enable SuperSelect"})
-              (set-badge-text #js {:text ""})
+              (db/count-table #(set-badge-text #js {:text (str %)}))
               (set-icon #js {:path "images/z38.png"})
-              (set-badge-background-color #js {:color #js [0 0 0 0]}))))))))
+              (set-badge-background-color #js {:color "gray"}))))))))
 
 (defn- open-workspace! []
   (let [url (get-url "workspace.html")

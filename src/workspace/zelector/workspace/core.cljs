@@ -114,7 +114,7 @@
     (into [header-row] data)))
 
 (defn export-csv []
-  (let [data (-> (get-data) square-data* (append-provenance* (get-meta)) with-headers*)
+  (let [data (-> (get-data) square-data* (append-provenance* (get-meta)))
         csv (.unparse js/Papa (clj->js data))]
     (.open js/window (str "data:text/csv;charset=utf-8,"
                        (js/encodeURIComponent csv)))))
