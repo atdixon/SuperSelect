@@ -9,6 +9,4 @@
   (ui/init-basic!))
 
 (defonce setup
-  (do
-    (log "sandbox: setup")
-    (ui/init-basic!)))
+  (ui/init-basic!))

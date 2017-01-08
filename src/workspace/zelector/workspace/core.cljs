@@ -164,7 +164,6 @@
   (bind-handlers!))
 
 (defn init! []
-  (log "workspace: init")
   (db/init!)
   (install-table!)
   (load-table-data!)

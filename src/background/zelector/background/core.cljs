@@ -141,7 +141,7 @@
 
 ; --- main event loop ---
 (defn process-event [event-num event]
-  (log (gstring/format "BACKGROUND: got chrome event (%05d)" event-num) event)
+  (comment log (gstring/format "BACKGROUND: got chrome event (%05d)" event-num) event)
   (let [[event-id args] event]
     (case event-id
       ::runtime/on-connect (apply handle-client-connection! args)
