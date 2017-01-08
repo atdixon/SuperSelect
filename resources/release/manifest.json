@@ -1,5 +1,6 @@
 {
   "name": "SuperSelect",
+  "description": "Select and save text from web pages with speed!",
   "version": "0.0.1",
   "browser_action": {
     "default_icon": {
