@@ -53,7 +53,7 @@
   [{:keys [state]} _ {:keys [value]}]
   {:action
    (fn []
-     (swap! state update :buffer conj {:id (random-uuid) :content value}))})
+     (swap! state update :buffer (comp vec conj) {:id (random-uuid) :content value}))})
 
 (defmethod mutate 'buffer/remove
   [{:keys [state]} _ {:keys [index]}]

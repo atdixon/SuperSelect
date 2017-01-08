@@ -11,7 +11,6 @@
             [goog.string.format]
             [cljsjs.jquery]
             [jayq.core :as j]
-            [zelector.common.core :as zcore]
             [zelector.common.util :as util]
             [zelector.common.trav :as trav]
             [zelector.common.bgx :as bgx]
