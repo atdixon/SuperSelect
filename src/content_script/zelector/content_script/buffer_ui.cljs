@@ -46,7 +46,7 @@
                 (map-indexed
                   #(buffer-item {:index %1 :id (:id %2) :content (:content %2)})
                   buffer)))))
-        (dom/div #js {:id "zelector-action-bar" :className (when active "zelector-active")}
+        (dom/div #js {:id "zelector-action-bar" :className (if active "zelector-active" "zelector-inactive")}
           (dom/div #js {:id "zelector-action-bar-activator"
                         :title (str/join " " [(if active "Deactivate" "Activate") "SuperSelect (Shift+Z)"])}
             (dom/span #js {:onClick #(do
@@ -62,16 +62,18 @@
                              :style #js {:fontWeight "bold"}})))
           (dom/div #js {:className "zelector-actions"
                         :style #js {:float "right"}}
-            (dom/span #js {:className "zelector-action-link"
-                           :title "Save this buffer to the workspace"
-                           :onClick (fn [e]
-                                      (flush-buffer-fn buffer)
-                                      (clear-buffer!))}
-              (dom/span #js {:className "fa fa-save"}))
-            (dom/span #js {:className "zelector-action-link"
-                           :title "Clear this buffer"
-                           :onClick #(clear-buffer!)}
-              (dom/span #js {:className "fa fa-times-circle"}))
+            (when-not (empty? buffer)
+              (dom/span #js {:className "zelector-action-link"
+                             :title "Save this buffer to the workspace"
+                             :onClick (fn [e]
+                                        (flush-buffer-fn buffer)
+                                        (clear-buffer!))}
+                (dom/span #js {:className "fa fa-save"})))
+            (when-not (empty? buffer)
+              (dom/span #js {:className "zelector-action-link"
+                             :title "Clear this buffer"
+                             :onClick #(clear-buffer!)}
+                (dom/span #js {:className "fa fa-times-circle"})))
             (dom/span #js {:className "zelector-action-link"
                            :title "Open the workspace tab"
                            :onClick #(open-workspace!)}

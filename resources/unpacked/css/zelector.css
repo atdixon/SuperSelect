@@ -141,6 +141,7 @@
 
 /* action bar */
 #zelector-action-bar {
+    width: 185px;
     display: flex;
     align-items: center;
     float: right;
@@ -168,6 +169,7 @@
 
 #zelector-action-bar .zelector-actions {
     font-size: 15px;
+    margin-left: auto;
 }
 
 #zelector-action-bar .zelector-action-link {
@@ -176,20 +178,20 @@
     margin-left: 10px;
 }
 
-#zelector-action-bar .zelector-action-link, #zelector-action-bar .zelector-toggler, #zelector-action-bar .zelector-text {
+#zelector-action-bar .zelector-action-link,
+#zelector-action-bar .zelector-toggler,
+#zelector-action-bar .zelector-text {
     cursor: pointer;
 }
 
-#zelector-action-bar #zelector-action-bar-activator:hover .zelector-text {
-    /*text-decoration: underline;*/
-}
-
+#zelector-action-bar #zelector-action-bar-activator:hover .zelector-text,
 #zelector-action-bar #zelector-action-bar-activator:hover .zelector-toggler {
-    /*color: darkorange;*/
+    color: white;
 }
 
-#zelector-action-bar.zelector-active .zelector-toggler {
-    /*color: darkblue;*/
+#zelector-action-bar.zelector-inactive .zelector-text,
+#zelector-action-bar.zelector-inactive .zelector-toggler {
+    color: #e0e0e0;
 }
 
 #zelector-action-bar .zelector-action-link:hover {
