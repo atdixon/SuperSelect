@@ -1,5 +1,5 @@
-(defproject zelector "0.1.0"
-  :description "Zelector. Select the Web."
+(defproject SuperSelect "0.1.0"
+  :description "SuperSelect. Select the Web."
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/clojurescript "1.9.293"]
                  [org.clojure/core.async "0.2.395"]
