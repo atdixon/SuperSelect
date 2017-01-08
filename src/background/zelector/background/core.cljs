@@ -63,12 +63,14 @@
         (let [{:keys [z/enabled]} (util/js->clj* items)]
           (if enabled
             (do
-              (set-title #js {:title "Disable Zelector"})
+              (set-title #js {:title "Disable SuperSelect"})
               (db/count-table #(set-badge-text #js {:text (str %)}))
-              (set-badge-background-color #js {:color "darkorange"}))
+              (set-icon #js {:path "images/z38-active.png"})
+              (set-badge-background-color #js {:color "gray"}))
             (do
-              (set-title #js {:title "Enable Zelector"})
+              (set-title #js {:title "Enable SuperSelect"})
               (set-badge-text #js {:text ""})
+              (set-icon #js {:path "images/z38.png"})
               (set-badge-background-color #js {:color #js [0 0 0 0]}))))))))
 
 (defn- open-workspace! []

@@ -1,5 +1,6 @@
 (ns zelector.content-script.buffer-ui
   (:require [chromex.logging :refer-macros [log info warn error group group-end]]
+            [clojure.string :as str]
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
             [zelector.common.bgx :as bgx]))
@@ -45,21 +46,24 @@
                 (map-indexed
                   #(buffer-item {:index %1 :id (:id %2) :content (:content %2)})
                   buffer)))))
-        (dom/div #js {:id "zelector-action-bar"}
-          (dom/div #js {:id "zelector-action-bar-activator"}
+        (dom/div #js {:id "zelector-action-bar" :className (when active "zelector-active")}
+          (dom/div #js {:id "zelector-action-bar-activator"
+                        :title (str/join " " [(if active "Deactivate" "Activate") "SuperSelect (Shift+Z)"])}
             (dom/span #js {:onClick #(do
                                       (om/transact! this
                                         `[(durable/update {:z/active ~(not active)})])
                                       (when active
                                         (om/transact! this
                                           '[(z/put {:mark/mark nil})])))}
-              (dom/span #js {:className "zelector-clickable"
-                             :style #js {:fontWeight "bold"}} "Zelector"))
-            (dom/span #js {} " (Shift+Z)"))
+              (dom/span #js {:className "zelector-text"
+                             :style #js {:fontWeight "bold" :marginRight 5}} "SuperSelect")
+              (dom/span #js {:className (str/join " "
+                                          ["zelector-toggler" (if active "fa fa-toggle-on" "fa fa-toggle-off")])
+                             :style #js {:fontWeight "bold"}})))
           (dom/div #js {:className "zelector-actions"
                         :style #js {:float "right"}}
             (dom/span #js {:className "zelector-action-link"
-                           :title "Save this buffer to the backend"
+                           :title "Save this buffer to the workspace"
                            :onClick (fn [e]
                                       (flush-buffer-fn buffer)
                                       (clear-buffer!))}
@@ -67,7 +71,7 @@
             (dom/span #js {:className "zelector-action-link"
                            :title "Clear this buffer"
                            :onClick #(clear-buffer!)}
-              (dom/span #js {:className "fa fa-trash"}))
+              (dom/span #js {:className "fa fa-times-circle"}))
             (dom/span #js {:className "zelector-action-link"
                            :title "Open the workspace tab"
                            :onClick #(open-workspace!)}
