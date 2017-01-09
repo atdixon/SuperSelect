@@ -1,4 +1,4 @@
--- autoupdate
+-- chrome store, updating, g/analytics
 -- oss w/ readme/writeup, license
 -- ask hn; is this useful? etc.
 -- critique hn.
