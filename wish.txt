@@ -1,4 +1,5 @@
 -- popup again...?
+-- mouse moves don't go through buffer ui
 -- chrome store, updating, g/analytics
 -- oss w/ readme/writeup, license
 -- ask hn; is this useful? etc.
