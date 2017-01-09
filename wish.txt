@@ -1,3 +1,4 @@
+-- popup again...?
 -- chrome store, updating, g/analytics
 -- oss w/ readme/writeup, license
 -- ask hn; is this useful? etc.
@@ -33,8 +34,6 @@ future
 
 code
 -- fully replace custom externs w/ oops
--- move debugger to root level, have it query root props, dynamically render
-    -- does this make it easier to only add it in unpacked modes
 -- optimize ui tree w/ components for mark, over (over queries/refreshes on [client-x, client-y] or scroll forces)
     -- org om components for minimal odm diffs/updates
 
