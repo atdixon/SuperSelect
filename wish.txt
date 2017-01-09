@@ -1,7 +1,10 @@
 -- popup again...?
+-- Ctl+S, Ctl+Z?? no?
 -- mouse moves don't go through buffer ui
 -- chrome store, updating, g/analytics
+    - https://chrome.google.com/webstore/developer/dashboard
 -- oss w/ readme/writeup, license
+-- demo page
 -- ask hn; is this useful? etc.
 -- critique hn.
     - ucs: note taking, semantic blog extract, vocab/dictionary, pl learning, cocktails/recipes, ml training, flash cards, etc.
