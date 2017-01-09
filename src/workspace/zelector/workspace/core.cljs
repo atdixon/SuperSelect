@@ -116,8 +116,11 @@
 (defn export-csv []
   (let [data (-> (get-data) square-data* (append-provenance* (get-meta)))
         csv (.unparse js/Papa (clj->js data))]
-    (.open js/window (str "data:text/csv;charset=utf-8,"
-                       (js/encodeURIComponent csv)))))
+    (-> (j/$ "#download-link")
+      (.attr "href" (str "data:text/csv;charset=utf-8,"
+                      (js/encodeURIComponent csv)))
+      (aget 0)
+      .click)))
 
 ; --- init ---
 (defn- bind-handlers! []
