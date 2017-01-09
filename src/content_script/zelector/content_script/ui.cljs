@@ -93,7 +93,7 @@
                       (om/transact! this `[(z/put {:mark/mark ~over})])))}))
 
 (defn mark-els
-  "Render 'mark'. "
+  "Render 'mark'."
   [this & {:keys [mark]}]
   (if mark
     (map-indexed
@@ -213,7 +213,8 @@
               (combined-bg-els this :combined combined)
               (combined-fg-els this :combined combined)
               (mark-els this :mark mark)
-              (over-els this :over over)
+              (when-not mark
+                (over-els this :over over))
               (glass-el this
                 :mark mark :over over :combined combined :frozen frozen))))))))
 
