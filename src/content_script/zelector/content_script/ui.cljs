@@ -170,7 +170,7 @@
             (trav/range->str split)))
         (trav/range->client-rects split)))))
 
-(defui Zelector
+(defui SuperSelect
   static om/IQuery
   (query [this] '[:mark/ch :mark/over :mark/mark :flag/frozen
                   :buffer {:durable [:z/enabled :z/active]}])
@@ -306,7 +306,7 @@
   (backgound-connect!)
   (binding [*css-url-fa* (get-url "css/fa/css/font-awesome-chrome-ext.min.css")
             *css-url-ze* (get-url "css/zelector.css")]
-    (om/add-root! reconciler Zelector
+    (om/add-root! reconciler SuperSelect
       (install-glass-mount! (install-glass-host!)))))
 
 ; --- for sandbox ---
@@ -316,7 +316,7 @@
   []
   (bgx/connect-null!)
   (om.next/merge! reconciler {:durable {:z/enabled true :z/active true}})
-  (om/add-root! reconciler Zelector
+  (om/add-root! reconciler SuperSelect
     (install-glass-mount! (install-glass-host!))))
 
 (defn destroy-basic! []

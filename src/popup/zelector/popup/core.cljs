@@ -59,20 +59,18 @@
           image-url (get-url "images/zStrip.png")]
       (dom/div
         #js {}
-        (dom/div #js {:style #js {:textAlign "center"}}
+        (comment dom/div #js {:className "banner" :style #js {:textAlign "center"}}
           (dom/img #js {:src image-url :height 25}))
         (dom/ul #js {}
           (if enabled
-            (dom/li #js {:onClick #((om/transact! this '[(z/update {:z/enabled false :z/active false})])
-                                    (close-popup!))}
-              "Disable Controls" (dom/span #js {:className "fa fa-times"}))
-            (dom/li #js {:onClick #((om/transact! this '[(z/update {:z/enabled true})])
-                                    (close-popup!))}
-              "Enable Controls"
+            (dom/li #js {:onClick #(om/transact! this '[(z/update {:z/enabled false :z/active false})])}
+              (dom/span #js {:className "text"} "Disable Controls") (dom/span #js {:className "fa fa-times"}))
+            (dom/li #js {:onClick #(om/transact! this '[(z/update {:z/enabled true})])}
+              (dom/span #js {:className "text"} "Enable Controls")
               (dom/span #js {:className "fa fa-check"
                              :style #js {}})))
           (dom/li #js {:onClick #((open-workspace!) (close-popup!))}
-            "Go to Workspace"
+            (dom/span #js {:className "text"} "Go to Workspace")
             (dom/span #js {:className "fa fa-external-link-square"
                            :style #js {}})))))))
 

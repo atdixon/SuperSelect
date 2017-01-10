@@ -14,6 +14,7 @@
     "38": "images/z38.png",
     "128": "images/z128.png"
   },
+  "content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self'",
   "web_accessible_resources": [
     "css/*"
   ],
