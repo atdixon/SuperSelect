@@ -24,30 +24,30 @@
 ; --- client mgmt ---
 (defonce clients (atom []))
 
-(defn add-client! [port]
+(defn- add-client! [port]
   (swap! clients conj port))
 
-(defn remove-client! [port]
+(defn- remove-client! [port]
   (let [remove-item (fn [coll item] (remove #(identical? item %) coll))]
     (swap! clients remove-item port)))
 
-(defn message-clients*! [msg]
+(defn- message-clients*! [msg]
   (doseq [client @clients]
     (post-message! client (clj->js msg))))
 
 ; --- local storage ---
-(defn get-stored-keys
+(defn- get-stored-keys
   "Get value for a key/s (a vector of keywords), answer
   channel of result."
   [keys]
   (let [storage (storage/get-local)]
     (proto/get storage (clj->js keys))))
 
-(defn set-stored-keys! [m]
+(defn- set-stored-keys! [m]
   (let [storage (storage/get-local)]
     (proto/set storage (clj->js m))))
 
-(defn broadcast-stored-keys!
+(defn- broadcast-stored-keys!
   "Broadcast clients with all stored keys."
   []
   (go
@@ -56,7 +56,7 @@
         (message-clients*! {:action "config" :params items})))))
 
 ; --- actions ---
-(defn refresh-badge! []
+(defn- refresh-badge! []
   (go
     (let [[[items] err] (<! (get-stored-keys [:z/enabled]))]
       (when-not err
@@ -82,7 +82,7 @@
           (tabs/create (clj->js {:url url}))
           (tabs/update (gobj/get (util/any found-tabs) "id") #js {:active true}))))))
 
-(defn toggle-enabled! []
+(defn- toggle-enabled! []
   (go
     (let [[[items] err] (<! (get-stored-keys [:z/enabled]))]
       (when-not err
@@ -118,6 +118,7 @@
   (go-loop []
     (when-let [msg (<! client)]
       (let [{:keys [action params]} (util/js->clj* msg)]
+        (log "action" action params)
         (case action
           "record" (do
                      (db/add-record! (:record params) (:provenance params))
@@ -126,7 +127,8 @@
                      (refresh-badge!))
           "config" (if (empty? params)
                      (broadcast-stored-keys!)
-                     (set-stored-keys! params))
+                     (do (set-stored-keys! params)
+                         (refresh-badge!)))
           "refresh" (doseq [res (:resource params)]
                       (case res
                         "badge" (refresh-badge!)))
@@ -141,12 +143,13 @@
 
 ; --- main event loop ---
 (defn process-event [event-num event]
-  (comment log (gstring/format "BACKGROUND: got chrome event (%05d)" event-num) event)
+  (comment
+    log (gstring/format "BACKGROUND: got chrome event (%05d)" event-num) event)
   (let [[event-id args] event]
     (case event-id
       ::runtime/on-connect (apply handle-client-connection! args)
       ::storage/on-changed (broadcast-stored-keys!) ; broadcast all, making client's merge! reconcilation more direct for now.
-      ::action/on-clicked (toggle-enabled!)
+      ; ::action/on-clicked (toggle-enabled!)
       nil)))
 
 (defn run-event-loop! [ch]

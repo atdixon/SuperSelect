@@ -1,6 +1,4 @@
--- popup again...?
--- Ctl+S, Ctl+Z?? no?
--- mouse moves don't go through buffer ui
+-- lorem, font styling in buffer
 -- chrome store, updating, g/analytics
     - https://chrome.google.com/webstore/developer/dashboard
 -- oss w/ readme/writeup, license

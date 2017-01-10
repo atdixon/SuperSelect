@@ -182,15 +182,21 @@
       (bind js/window "scroll.zelector" #(.forceUpdate this))
       (bind js/document "keydown.zelector"
         (fn [e]
-          (let [{mark :mark {:keys [:z/active]} :durable} (om/props this)
+          (let [{:keys [:mark :buffer]} (om/props this)
+                {{:keys [:z/active]} :durable} (om/props this)
                 inp? (util/input-node? (.-target e))
-                z-key? (and (= (.toLowerCase (.-key e)) "z") (.-shiftKey e))
+                z-key? (= (.toLowerCase (.-key e)) "z")
+                s-key? (= (.toLowerCase (.-key e)) "s")
                 esc-key? (= (.-keyCode e) 27)]
-            (if (and esc-key? (not mark)) ; esc key with no mark deactivates
+            (when (and esc-key? (not mark)) ; esc key with no mark deactivates
               (om/transact! this '[(durable/update {:z/active false})]))
-            (if esc-key? ; esc key always clears mark
+            (when esc-key? ; esc key always clears mark
               (om/transact! this '[(z/put {:mark/mark nil})]))
-            (if (and z-key? (or active (not inp?)))
+            (when (and s-key? (or active (not inp?)))
+              (log "saving" buffer)
+              (save-buffer! buffer)
+              (om/transact! this `[(buffer/clear)]))
+            (when (and z-key? (or active (not inp?)))
               (om/transact! this `[(durable/update {:z/active ~(not active)}) (z/put {:mark/mark nil})])))))))
   (componentWillUnmount [this]
     (-> js/window j/$ (.unbind ".zelector"))
