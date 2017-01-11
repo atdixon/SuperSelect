@@ -293,7 +293,7 @@
   (-> (j/$ "<div id=\"zelector-glass-host\">")
     (.appendTo "body")
     (aget 0)
-    (ocall "attachShadow" #js {:mode "open"})))
+    (ocall "attachShadow" #js {:mode "closed"})))
 
 (defn init! []
   (backgound-connect!)

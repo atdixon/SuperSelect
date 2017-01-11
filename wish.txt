@@ -1,10 +1,8 @@
--- https://github.com/FortAwesome/Font-Awesome/issues/5274
--- disable standard selection of buffer items etc
+-- demo page
 -- chrome store, updating, g/analytics
     - https://chrome.google.com/webstore/developer/dashboard
 -- track ga events (e.g., buffer saves)
 -- oss w/ readme/writeup, license
--- demo page
 -- ask hn; is this useful? etc.
 -- critique hn.
     - ucs: note taking, semantic blog extract, vocab/dictionary, pl learning, cocktails/recipes, ml training, flash cards, etc.
