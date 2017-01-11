@@ -25,6 +25,9 @@
         "http://*/*",
         "https://*/*"
       ],
+      "css": [
+        "css/fa/css/font-awesome-ff-chrome-ext.css"
+      ],
       "js": [
         "compiled/content-script/main.js"
       ]

@@ -11,6 +11,8 @@
             [goog.string.format]
             [cljsjs.jquery]
             [jayq.core :as j]
+            [oops.core :refer [oget oset! ocall oapply ocall! oapply!
+                               oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
             [zelector.common.util :as util]
             [zelector.common.trav :as trav]
             [zelector.common.bgx :as bgx]
@@ -207,6 +209,8 @@
           combined (if (and mark over) (combine-ranges* mark over))]
       (if enabled
         (dom/div nil
+          (dom/link #js {:rel "stylesheet" :type "text/css" :href (get-url "css/fa/css/font-awesome.min.css")})
+          (dom/link #js {:rel "stylesheet" :type "text/css" :href (get-url "css/zelector.css")})
           (buffer-ui {:buffer buffer :active active :flush-buffer-fn save-buffer!})
           (if active
             (dom/div nil
@@ -281,33 +285,19 @@
         (recur)))))
 
 ; --- lifecycle ---
-(def ^:dynamic *css-url-fa* "css/fa/css/font-awesome.min.css")
-(def ^:dynamic *css-url-ze* "css/zelector.css")
-
-(defn- install-glass-host! []
+(defn- install-glass-host!
+  "Install mount div and shadow dom. Answer shadow root. Note: React events only
+  work if mount element is the shadow root, not any element descendant to shadow
+  root."
+  []
   (-> (j/$ "<div id=\"zelector-glass-host\">")
     (.appendTo "body")
-    (aget 0))) ; (.attachShadow #js {:mode "closed"}) note: react hates the shadow dom.
-
-(defn- install-css! [root-elem]
-  (let [templ "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"]
-    (doto (j/$ root-elem)
-      (.append (gstr/format templ *css-url-fa*))
-      (.append (gstr/format templ *css-url-ze*)))))
-
-(defn- install-glass-mount! [root-elem]
-  (do
-    (install-css! root-elem)
-    (-> (j/$ "<div id=\"zelector-glass-mount\">")
-      (.appendTo (j/$ root-elem))
-      (aget 0))))
+    (aget 0)
+    (ocall "attachShadow" #js {:mode "open"})))
 
 (defn init! []
   (backgound-connect!)
-  (binding [*css-url-fa* (get-url "css/fa/css/font-awesome-chrome-ext.min.css")
-            *css-url-ze* (get-url "css/zelector.css")]
-    (om/add-root! reconciler SuperSelect
-      (install-glass-mount! (install-glass-host!)))))
+  (om/add-root! reconciler SuperSelect (install-glass-host!)))
 
 ; --- for sandbox ---
 (defn init-basic!
@@ -317,7 +307,7 @@
   (bgx/connect-null!)
   (om.next/merge! reconciler {:durable {:z/enabled true :z/active true}})
   (om/add-root! reconciler SuperSelect
-    (install-glass-mount! (install-glass-host!))))
+    (install-glass-host!)))
 
 (defn destroy-basic! []
   (let [host (gdom/getElement "zelector-glass-host")

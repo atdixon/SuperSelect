@@ -1,5 +1,4 @@
 -- https://github.com/FortAwesome/Font-Awesome/issues/5274
--- shadow dom? fa styles getting applied to pages (bzstr)
 -- disable standard selection of buffer items etc
 -- chrome store, updating, g/analytics
     - https://chrome.google.com/webstore/developer/dashboard
