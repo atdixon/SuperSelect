@@ -172,6 +172,9 @@
             (trav/range->str split)))
         (trav/range->client-rects split)))))
 
+(declare *fa-css-url*)
+(declare *ze-css-url*)
+
 (defui SuperSelect
   static om/IQuery
   (query [this] '[:mark/ch :mark/over :mark/mark :flag/frozen
@@ -209,8 +212,8 @@
           combined (if (and mark over) (combine-ranges* mark over))]
       (if enabled
         (dom/div nil
-          (dom/link #js {:rel "stylesheet" :type "text/css" :href (get-url "css/fa/css/font-awesome.min.css")})
-          (dom/link #js {:rel "stylesheet" :type "text/css" :href (get-url "css/zelector.css")})
+          (dom/link #js {:rel "stylesheet" :type "text/css" :href *fa-css-url*})
+          (dom/link #js {:rel "stylesheet" :type "text/css" :href *ze-css-url*})
           (buffer-ui {:buffer buffer :active active :flush-buffer-fn save-buffer!})
           (if active
             (dom/div nil
@@ -296,14 +299,18 @@
     (ocall "attachShadow" #js {:mode "closed"})))
 
 (defn init! []
+  (def *fa-css-url* (get-url "css/fa/css/font-awesome-chrome-ext.min.css"))
+  (def *ze-css-url* (get-url "css/zelector.css"))
   (backgound-connect!)
   (om/add-root! reconciler SuperSelect (install-glass-host!)))
 
-; --- for sandbox ---
+; --- for demo ---
 (defn init-basic!
   "Init headless (feetless?), i.e., w/o a background page or browser
   extension environment."
   []
+  (def *fa-css-url* "css/fa/css/font-awesome.min.css")
+  (def *ze-css-url* "css/zelector.css")
   (bgx/connect-null!)
   (om.next/merge! reconciler {:durable {:z/enabled true :z/active true}})
   (om/add-root! reconciler SuperSelect

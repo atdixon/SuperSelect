@@ -1,0 +1,236 @@
+#zelector-glass {
+    pointer-events: auto;
+    cursor: default;
+
+    z-index: 2147483646;
+    position: fixed;
+    box-sizing: border-box;
+    top: 0;
+    left: 0;
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+    min-width: 100%;
+
+    border: 5px solid rgb(0, 100, 255);
+    margin: 0;
+    background-color: rgba(0, 0, 255, 0.03);
+}
+
+/* selection */
+.zelector-selection-base-rect {
+    pointer-events: none;
+    z-index: 2147483647;
+    position: fixed;
+
+    border: 0 solid black;
+    background-color: #494949;
+}
+
+.zelector-selection-text-rect {
+    pointer-events: none;
+    z-index: 2147483647;
+    position: fixed;
+    user-select: none;
+    overflow: hidden;
+    white-space: nowrap;
+
+    background-color: #494949;
+    color: white;
+}
+
+.zelector-selection-mark-rect {
+    pointer-events: none;
+    z-index: 2147483647;
+    position: fixed;
+
+    border: solid black;
+}
+
+.zelector-selection-over-rect {
+    pointer-events: none;
+    z-index: 2147483647;
+    position: fixed;
+
+    border: solid black;
+    border-radius: 0;
+}
+
+/* buffer */
+#zelector-buffer {
+    z-index: 2147483647;
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+
+    user-select: none;
+
+    width: 375px;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+
+    font-family: Times, serif;
+    font-size: 15px;
+    color: white;
+
+    cursor: default;
+}
+
+#zelector-buffer ul {
+    margin: 0;
+    padding: 0;
+    border: 2px solid #494949;
+}
+
+#zelector-buffer li {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    list-style: none;
+
+    margin: 0 0;
+    padding: 10px 12px;
+    border-radius: 0;
+
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+#zelector-buffer li:not(:first-child) {
+    border-top: 1px dashed #a9a9a9;
+}
+
+.zelector-buffer-item-index {
+    width: 12px;
+    padding: 2px;
+    border-radius: 3px;
+    margin-right: 5px;
+
+    font-family: Arial, serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.zelector-buffer-item-content {
+    margin: 0 10px;
+    width: 300px;
+}
+
+.zelector-buffer-item-delete {
+    cursor: pointer;
+}
+
+.zelector-buffer-item-enter {
+    opacity: 0.01;
+    max-height: 0;
+}
+
+.zelector-buffer-item-enter.zelector-buffer-item-enter-active {
+    opacity: 1;
+    max-height: 200px;
+    transition: max-height 500ms ease-in;
+}
+
+.zelector-buffer-item-leave {
+    opacity: 1;
+}
+
+.zelector-buffer-item-leave.zelector-buffer-item-leave-active {
+    opacity: 0.01;
+    transition: opacity 200ms ease-in;
+}
+
+/* action bar */
+#zelector-action-bar {
+    width: 200px;
+    display: flex;
+    align-items: center;
+    float: right;
+    user-select: none;
+    border: 2px solid #494949;
+    margin-top: 2px;
+    padding: 5px;
+    font-family: Arial, serif;
+    font-size: 12px;
+    background-color: rgba(0, 0, 0, 0.6);
+    line-height: normal;
+}
+
+#zelector-action-bar-activator {
+    margin-right: 25px;
+}
+
+#zelector-action-bar div {
+    display: inline-block;
+}
+
+#zelector-action-bar .zelector-separator {
+    color: #a9a9a9;
+}
+
+#zelector-action-bar .zelector-actions {
+    font-size: 15px;
+    margin-left: auto;
+}
+
+#zelector-action-bar .zelector-action-link {
+    color: white;
+    text-decoration: underline;
+    margin-left: 10px;
+}
+
+#zelector-action-bar .zelector-action-link,
+#zelector-action-bar .zelector-toggler,
+#zelector-action-bar .zelector-text {
+    cursor: pointer;
+}
+
+#zelector-action-bar .zelector-toggler {
+    margin-right: 5px;
+}
+
+#zelector-action-bar .zelector-toggler,
+#zelector-action-bar .zelector-text {
+    font-weight: bold;
+}
+
+#zelector-action-bar #zelector-action-bar-activator:hover .zelector-text,
+#zelector-action-bar #zelector-action-bar-activator:hover .zelector-toggler {
+    color: white;
+}
+
+#zelector-action-bar.zelector-inactive .zelector-text,
+#zelector-action-bar.zelector-inactive .zelector-toggler {
+    /*color: #e0e0e0;*/
+}
+
+#zelector-action-bar .zelector-action-link:hover {
+    color: darkorange;
+}
+
+/* debug */
+#zelector-debug {
+    z-index: 2147483647;
+    position: fixed;
+    top: 0;
+    right: 5px;
+    overflow: auto;
+
+    width: 350px;
+    margin: 15px;
+    padding: 5px;
+
+    font-family: Courier, sans-serif;
+    font-size: 12px;
+    background-color: rgba(245, 245, 220, 0.8);
+    border: 2px solid black;
+    text-align: left;
+}
+
+#zelector-debug .zelector-debug-breakdown {
+    height: 75px;
+    overflow-y: scroll;
+    border: 1px solid red;
+    background-color: rgba(255, 255, 255, 0.8);
+}

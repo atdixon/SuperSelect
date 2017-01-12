@@ -26,12 +26,13 @@
                  "src/popup"
                  "src/content_script"
                  "src/workspace"
-                 "src/sandbox"]
+                 "src/demo"]
 
   :clean-targets ^{:protect false} ["target"
                                     "releases"
                                     "resources/unpacked/compiled"
-                                    "resources/release/compiled"]
+                                    "resources/release/compiled"
+                                    "docs/js/compiled"]
 
   :cljsbuild {:builds {}}
 
@@ -86,17 +87,17 @@
                                              :provides ["dexie"]}
                                             {:file "foreign-lib/handsontable/handsontable.full.js"
                                              :provides ["handsontable"]}]}}]}}]
-             :sandbox
+             :demo
              {:cljsbuild
               {:builds
-               [{:id "sandbox"
-                 :source-paths ["src/sandbox" "src/content_script" "src/common"]
-                 :figwheel {:on-jsload "zelector.sandbox/fig-reload-hook"}
-                 :compiler {:output-to "resources/unpacked/compiled/sandbox/main.js"
-                            :output-dir "resources/unpacked/compiled/sandbox"
-                            :asset-path "compiled/sandbox"
+               [{:id "demo"
+                 :source-paths ["src/demo" "src/content_script" "src/common"]
+                 :figwheel {:on-jsload "zelector.demo/fig-reload-hook"}
+                 :compiler {:output-to "resources/unpacked/compiled/demo/main.js"
+                            :output-dir "resources/unpacked/compiled/demo"
+                            :asset-path "compiled/demo"
                             :preloads [devtools.preload]
-                            :main zelector.sandbox
+                            :main zelector.demo
                             :optimizations :none
                             :source-map true
                             :externs ["foreign-lib/dexie/dexie-externs.js"
@@ -192,12 +193,31 @@
                                             {:file "foreign-lib/handsontable/handsontable.full.min.js"
                                              :provides ["handsontable"]}]
                              :closure-defines {"goog.DEBUG" false}
+                             :language-in :ecmascript5 :language-out :ecmascript5}}
+                 {:id "demo-release"
+                  :source-paths ["src/demo" "src/content_script" "src/common"]
+                  :compiler {:output-to "docs/js/compiled/demo.js"
+                             :output-dir "target/compiled/demo"
+                             :main zelector.demo
+                             :optimizations :advanced
+                             :elide-asserts true
+                             :externs ["foreign-lib/dexie/dexie-externs.js"
+                                       "foreign-lib/handsontable/handsontable-externs.js"]
+                             :foreign-libs [{:file "foreign-lib/dexie/dexie.min.js"
+                                             :provides ["dexie"]}
+                                            {:file "foreign-lib/handsontable/handsontable.full.min.js"
+                                             :provides ["handsontable"]}]
+                             :closure-defines {"goog.DEBUG" false}
                              :language-in :ecmascript5 :language-out :ecmascript5}}]}}]}
 
   :aliases {"dev-build" ["with-profile" "+unpacked,+unpacked-content-script" "cljsbuild" "once"]
             "content-dev" ["with-profile" "+unpacked-content-script" "cljsbuild" "auto" "content-script"]
             "fig-dev" ["with-profile" "+unpacked,+figwheel" "figwheel" "background" "popup" "workspace"]
-            "sandbox" ["with-profile" "+sandbox,+figwheel" "figwheel" "sandbox"]
+            "fig-demo" ["with-profile" "+demo,+figwheel" "figwheel" "demo"]
+            "demo-release" ["with-profile" "+release" "do"
+                            ["clean"]
+                            ["cljsbuild" "once" "demo-release"]
+                            ["shell" "cp" "resources/unpacked/css/zelector.css" "docs/css/"]]
             "release" ["with-profile" "+release" "do"
                        ["clean"]
                        ["cljsbuild" "once" "background" "popup" "workspace" "content-script"]]

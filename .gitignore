@@ -14,3 +14,5 @@ resources/unpacked/compiled/
 resources/release/compiled/
 .chrome-profile/
 releases
+docs/Gemfile.lock
+docs/_site/*

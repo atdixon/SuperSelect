@@ -1,4 +1,4 @@
-(ns zelector.sandbox
+(ns zelector.demo
   (:require
     [zelector.content-script.ui :as ui]
     [chromex.logging :refer-macros [log info warn error group group-end]]))
