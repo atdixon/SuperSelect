@@ -1,4 +1,7 @@
--- demo page, support all browsers? or
+-- demo page
+    -- only chrome support!
+    -- g/analytics
+
 -- chrome store, updating, g/analytics
     - https://chrome.google.com/webstore/developer/dashboard
 -- track ga events (e.g., buffer saves)
