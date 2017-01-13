@@ -19,7 +19,8 @@ Theme Styles
 
 body {
   color:#373737;
-  background: #212121;
+  background: white;
+  /*background: #212121;*/
   font-size: 18px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -261,7 +262,7 @@ header {
 }
 
 #header_wrap .inner {
-  padding: 60px 10px 0px 0px;
+  padding: 60px 10px 10px 0;
 }
 
 #project_title {
@@ -302,11 +303,11 @@ header {
 #main_content.inner {
   background-color: #fff;
   padding: 70px 100px;
-  box-shadow: 0 0 5px #ebebeb;
-  -webkit-box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
-  -moz-box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
-  -o-box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
-  -ms-box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+  /*box-shadow: 0 0 5px #ebebeb;*/
+  /*-webkit-box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);*/
+  /*-moz-box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);*/
+  /*-o-box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);*/
+  /*-ms-box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);*/
 }
 
 #footer_wrap {

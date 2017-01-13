@@ -312,7 +312,7 @@
   (def *fa-css-url* "css/fa/css/font-awesome.min.css")
   (def *ze-css-url* "css/zelector.css")
   (bgx/connect-null!)
-  (om.next/merge! reconciler {:durable {:z/enabled true :z/active true}})
+  (om.next/merge! reconciler {:durable {:z/enabled true :z/active false}})
   (om/add-root! reconciler SuperSelect
     (install-glass-host!)))
 
