@@ -10,9 +10,12 @@ body {
     background-color: rgba(0, 0, 0, 0.6);
 }
 
+#app .banner {
+    text-align: center;
+}
+
 #app img {
     margin: 5px 0;
-    background-color: white;
 }
 
 #app ul {
