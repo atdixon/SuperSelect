@@ -32,7 +32,8 @@
                                     "releases"
                                     "resources/unpacked/compiled"
                                     "resources/release/compiled"
-                                    "docs/js/compiled"]
+                                    ; too easy to delete & commit -> "docs/js/compiled"
+                                    ]
 
   :cljsbuild {:builds {}}
 
