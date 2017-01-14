@@ -1,11 +1,7 @@
-    -- disable actual plugin on demo page
-
--- https://atdixon.github.io/SuperSelect/
-
--- chrome store, updating, g/analytics
-    - https://chrome.google.com/webstore/developer/dashboard
--- track ga events (e.g., buffer saves)
-
+-- disable actual plugin on demo page
+-- test released extension
+    -- test ga
+-- DEPLOY!!!
 -- oss w/ readme/writeup, license
 -- ask hn; is this useful? etc.
 -- critique hn.
