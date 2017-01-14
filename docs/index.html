@@ -26,8 +26,8 @@ repository_url: https://github.com/atdixon/SuperSelect
 <!-- HEADER -->
 <div id="header_wrap" class="outer">
     <header class="inner">
-        <a id="forkme_banner" href="{{page.repository_url}}">View on GitHub <span
-                class="fa fa-external-link"></span></a>
+        <!--<a id="forkme_banner" href="{{page.repository_url}}">View on GitHub <span-->
+                <!--class="fa fa-external-link"></span></a>-->
 
         <h1 id="project_title"><span class="supe">Supe</span>rSelect</h1>
         <h2 id="project_tagline">Select and save text from the web with speed.</h2>
@@ -44,6 +44,10 @@ repository_url: https://github.com/atdixon/SuperSelect
 <!-- MAIN CONTENT -->
 <div id="main_content_wrap" class="outer">
     <section id="main_content" class="inner">
+        <p id="browser-warning" style="display: none; border: 1px solid red; background-color: pink; padding: 15px;">
+            <b>WARNING</b> This demo only works when using the Chrome browser.
+            Download Chrome <a href="https://www.google.com/chrome">here.</a>
+        </p>
         <p>SuperSelect is a Chrome browser extension, but you can use some of
             its features right here on this web page to learn how it works!</p>
 
@@ -56,11 +60,10 @@ repository_url: https://github.com/atdixon/SuperSelect
 
         <h3>The Overlay</h3>
         <p>The SuperSelect Overlay is like a piece of glass laid over the current web page.
-            To turn it On, we simply press the "<b>Z</b>" key. We could also click in the
+            To turn it On, we simply press the "<b>Z</b>" key. We could also click "Overlay" in the
             controls, but the keyboard is faster.</p>
 
-        <p>Let's enable the Overlay now.
-            Press the "<b>Z</b>" key.
+        <p>Enable the Overlay now by pressing the "<b>Z</b>" key.
             You should see the tinted Overlay and a blue border appear.
             Pressing the "<b>Z</b>" key again should toggle the Overlay Off.</p>
 
@@ -71,13 +74,27 @@ repository_url: https://github.com/atdixon/SuperSelect
         <p>Once the Overlay is On selecting text is just a matter of clicking the start and end positions of the text
             you wish to select.</p>
 
-        <h3>Your Try</h3>
+        <p>With the Overlay On go ahead and click the beginning and end of this sentence to select it.</p>
+
+        <h3>The Buffer</h3>
+        <p>As you make selections you'll see that they appear above the SuperSelect control. This area is called
+            the <b>Buffer</b>.</p>
+        <p>All selections appear in the Buffer until the Buffer is saved.</p>
+        <p>You can save the Buffer by clicking on the <span class="fa fa-save"></span>
+            icon in the controls or by pressing the "<b>S</b>" key.</p>
+
+        <p>At any time you can remove selections from your Buffer by clicking the appropriate
+            <span class="fa fa-times-circle"></span> icon.</p>
+
+        <h3>You Try</h3>
 
         <p>One trivial use case for SimpleSelect is collecting information to pull into a flash card application such
             as <a href="http://ankisrs.net/" target="_blank">Anki</a>.</p>
 
-        <p>For example, let's say we want to collect words from a dictionary site to add to our ever-growing
-            personal vocabulary flash card deck. Here's a word you might like:</p>
+        <p>For example, let's say you want to collect words from a dictionary website to add to your ever-growing
+            personal vocabulary flash card deck.</p>
+
+        <p>Here's a word you might like:</p>
 
         <dl style="padding: 5px; text-align: center; border: 1px solid pink; background-color: #f5f0e9;">
             <dt>mondegreen</dt>
@@ -87,44 +104,44 @@ repository_url: https://github.com/atdixon/SuperSelect
             <dd>"There's a bathroom on the right" is a mondegreen of Creedence Clearwater Revival's "There's a bad moon on the rise."</dd>
         </dl>
 
-        <p>Let's grab this word and its data using SuperSelect.</p>
-            <p>First, make sure the Overlay is enabled. Press "<b>Z</b>" until the blue border appears.
-                Then click on the word "mondegreen" once and then once again. Then click on the word "a" right before
-                "misinterpretation" and complete the selection by clicking on "lyric".</p>
-
-        <h3>The Buffer</h3>
-        <p>As you make selections you'll see that they appear above the SuperSelect control. This is called the Buffer.
-            All selections appear in the Buffer until the Buffer is saved by clicking on the <span class="fa fa-save"></span>
-            icon or pressing the "<b>S</b>" key.</p>
-
-        <p>At any time you can remove selections from your Buffer by clicking the appropriate
-            <span class="fa fa-times-circle"></span> icon.</p>
+        <p>Let's select this word and its data using SuperSelect.</p>
+        <p>First, make sure the Overlay is enabled. (Press "<b>Z</b>" until the blue border appears.)</p>
+        <p>Then click on the word "mondegreen" once and then once again. Then click on the word "a" right before
+            "misinterpretation" and complete the selection by clicking on "lyric".</p>
 
         <h3>The Workspace</h3>
-        <p>This is a demo, so Save <span class="fa fa-save"></span> doesn't work here to actually store your selections.</p>
+        <p>You should see your selections in the SuperSelect buffer. Normally at this point you would press "<b>S</b>"
+            or click <span class="fa fa-save"></span> to save your selections, but this is a demo, so Save
+            does nothing.</p>
         <p>The extension however,
-            when installed, will persist all of your Saved selections to a backend spreadsheet table, called the Workspace,
+            when installed, will persist all of your Saved selections to a backend spreadsheet table, called the
+            <b>Workspace</b>,
             where the data can be edited and exported to any application you like.</p>
 
-        <p>Each Save of the Buffer would create a new row in the backend spreadsheet table.</p>
+        <p>Each Save of the Buffer would create a new row in the backend spreadsheet table, like this:</p>
 
         <table>
             <tr>
                 <th>0</th>
                 <th>1</th>
+                <th>2</th>
                 <th>source</th>
             </tr>
             <tr>
                 <td>mondegreen</td>
                 <td>a misinterpretation of a word or phrase that has been heard, especially a song lyric.</td>
+                <td>"There's a bathroom on the right" is a mondegreen of Creedence Clearwater Revival's "There's a bad moon on the rise."</td>
                 <td>{{site.url}}{{page.url}}</td>
             </tr>
         </table>
 
         <h3>That's It?</h3>
-        <p>That's it! But the use cases are endless &mdash;
-            capturing data for flash cards, recipes, and the like, crafting machine learning training data sets from the web,
-            extracting semantic data from blogs, etc.</p>
+        <p>That's it!</p>
+
+        <p>But the use cases for SuperSelect are endless &mdash;
+            capturing data for flash cards, recipes, crafting machine learning training data sets from the web,
+            extracting semantic data from blogs, etc. &mdash; anytime you want to quickly select a bunch of data
+        from the web.</p>
 
         <p>Install SuperSelect.</p>
 
@@ -139,6 +156,23 @@ repository_url: https://github.com/atdixon/SuperSelect
         <!--<p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>-->
     <!--</footer>-->
 <!--</div>-->
-<script src="js/compiled/demo.js"></script>
+<script>
+    var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    var isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor);
+    if (isChrome) {
+        document.write('<script src="js/compiled/demo.js">');
+    } else {
+        document.getElementById("browser-warning").style.display = 'block';
+    }
+</script>
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-90139845-1', 'auto');
+    ga('send', 'pageview');
+</script>
 </body>
 </html>

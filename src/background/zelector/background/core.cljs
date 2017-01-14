@@ -13,9 +13,25 @@
             [goog.object :as gobj]
             [goog.string :as gstring]
             [goog.string.format]
+            [zelector.common.core :as zcore]
             [zelector.common.util :as util]
             [zelector.common.db :as db]))
 
+; --- ga ---
+(defn- fire-ga-event!
+  ([category action label]
+    (fire-ga-event! category action label nil))
+  ([category action label value]
+  (let [fields-obj (clj->js
+                     {:hitType "event"
+                      :eventCategory category
+                      :eventAction action
+                      :eventLabel label
+                      :eventValue value})]
+    (if (exists? js/ga)
+      (js/ga "send" fields-obj)
+      (log "ga" fields-obj ">/null")))))
+  
 ; --- *DANGER* ---
 (defn- clear-all-durable*!! []
   (clear (storage/get-local))
@@ -63,12 +79,10 @@
         (let [{:keys [z/enabled]} (util/js->clj* items)]
           (if enabled
             (do
-              (set-title #js {:title "Disable SuperSelect"})
               (db/count-table #(set-badge-text #js {:text (str %)}))
               (set-icon #js {:path "images/z38-active.png"})
               (set-badge-background-color #js {:color "gray"}))
             (do
-              (set-title #js {:title "Enable SuperSelect"})
               (db/count-table #(set-badge-text #js {:text (str %)}))
               (set-icon #js {:path "images/z38.png"})
               (set-badge-background-color #js {:color "gray"}))))))))
@@ -121,6 +135,7 @@
         (log "action" action params)
         (case action
           "record" (do
+                     (fire-ga-event! "Buffer" "AddRecord" (str "ver:" zcore/extension-version) (count params))
                      (db/add-record! (:record params) (:provenance params))
                      (message-clients*! {:action "refresh"
                                          :resource ["db"]})
