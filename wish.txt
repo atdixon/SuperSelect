@@ -1,4 +1,3 @@
--- github link
 -- detect mobile
 -- oss w/ readme/writeup, license
 -- ask hn; is this useful? etc.

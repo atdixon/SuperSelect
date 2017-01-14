@@ -1,13 +1,11 @@
----
-repository_url: https://github.com/atdixon/SuperSelect
----
+<!DOCTYPE html>
 <html>
 
 <head>
     <meta charset='utf-8'/>
     <meta http-equiv="X-UA-Compatible" content="chrome=1"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="description" content="Slate is a responsive theme for GitHub Pages"/>
+    <meta name="description" content="SuperSelect is a Chrome extension allowing you to rapidly select text from the web."/>
 
     <link rel="stylesheet" type="text/css" media="screen" href="css/stylesheet.css">
 
@@ -30,8 +28,7 @@ repository_url: https://github.com/atdixon/SuperSelect
 <!-- HEADER -->
 <div id="header_wrap" class="outer">
     <header class="inner">
-        <!--<a id="forkme_banner" href="{{page.repository_url}}">View on GitHub <span-->
-        <!--class="fa fa-external-link"></span></a>-->
+        <a id="forkme_banner" href="https://github.com/atdixon/SuperSelect" target="_blank">View on Github<span class="fa fa-external-link"></span></a>
 
         <h1 id="project_title"><span class="supe">Supe</span>rSelect</h1>
         <h2 id="project_tagline">Select and save text from the web with speed.</h2>
@@ -49,9 +46,20 @@ repository_url: https://github.com/atdixon/SuperSelect
 <div id="main_content_wrap" class="outer">
     <section id="main_content" class="inner">
         <p>
-        <div style="text-align: center; margin-bottom: 25px;">
-            <span class="install-button" onclick="chrome.webstore.install()">Install SuperSelect Now</span>
+        <div style="text-align: center; margin-bottom: 35px;">
+            <span class="install-button" onclick="chrome.webstore.install()">
+                Install
+                <span style="color:white;">
+                    <span style="background-color:red;">
+                        <span style="padding: 5px 0 5px 5px;">SUPE</span></span><span style="background-color: black;"><span style="padding: 5px 5px 5px 0;">RSELECT</span></span>
+                </span> Now
+                (Chrome)
+                </span>
         </div>
+        </p>
+        <p id="mobile-warning" style="display: none; border: 1px solid red; background-color: pink; padding: 15px;">
+            <b>WARNING</b> SuperSelect is a productivity tool, therefore it does not work on mobile and tablet devices.
+            Neither does this demo. Come back and visit us when you get to a desktop :)
         </p>
         <p id="browser-warning" style="display: none; border: 1px solid red; background-color: pink; padding: 15px;">
             <b>WARNING</b> This demo only works when using the Chrome browser.
@@ -158,9 +166,17 @@ repository_url: https://github.com/atdixon/SuperSelect
 
         <p>
         <div style="text-align: center; margin-top: 45px;">
-            <span class="install-button" onclick="chrome.webstore.install()">Install SuperSelect Now</span>
+            <span class="install-button" onclick="chrome.webstore.install()">
+                Install
+                <span style="color:white;">
+                    <span style="background-color:red;">
+                        <span style="padding: 5px 0 5px 5px;">SUPE</span></span><span style="background-color: black;"><span style="padding: 5px 5px 5px 0;">RSELECT</span></span>
+                </span>
+                Now (Chrome)
+                </span>
         </div>
         </p>
+
     </section>
 </div>
 
@@ -172,12 +188,15 @@ repository_url: https://github.com/atdixon/SuperSelect
 <!--</footer>-->
 <!--</div>-->
 <script>
+    var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
     var isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor);
-    if (isChrome) {
-        document.write('<script src="js/compiled/demo.js"><\/script>');
-    } else {
+    if (isMobile) {
+        document.getElementById("mobile-warning").style.display = 'block';
+    } else if (!isChrome) {
         document.getElementById("browser-warning").style.display = 'block';
+    } else {
+        document.write('<script src="js/compiled/demo.js"><\/script>');
     }
 </script>
 <script>

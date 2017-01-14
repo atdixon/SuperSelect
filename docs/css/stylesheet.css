@@ -234,20 +234,23 @@ Full-Width Styles
   top:0;
   right: 10px;
   z-index: 10;
-  padding: 10px 20px 10px 20px;
+  padding: 5px;
   color: #fff;
-  background: dimgray no-repeat 8% 50%;
-  background-size: 25px;
-  font-weight: 700;
+  background: #004e8e no-repeat 8% 50%;
+  font-size: 12px;
+  font-family: monospace, serif;
+  /*background-size: 25px;*/
+  /*font-weight: 700;*/
   border: none;
 }
 
 #forkme_banner .fa {
-  margin-left: 10px;
+  margin-left: 8px;
 }
 
 #forkme_banner:hover {
-  background-color: gray;
+  /*background-color: gray;*/
+  text-decoration: underline;
 }
 
 /*#forkme_banner:hover .fa {*/
@@ -399,7 +402,7 @@ Small Device Styles
 }
 
 .install-button:hover {
-  color: white;
-  border: 2px solid #494949;
-  background-color: rgba(0, 0, 0, 0.6);
+  /*color: white;*/
+  /*border: 2px solid #494949;*/
+  background-color: rgba(0, 0, 0, 0.1);
 }
