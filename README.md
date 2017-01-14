@@ -1,12 +1,12 @@
-#### Demo It
+### Demo It
 
 Demo SuperSelect [here](http://superselect.rocks).
 
-#### Install It
+### Install It
 
 Install SuperSelect [here](https://chrome.google.com/webstore/detail/superselect/pflcicgpnhmpkgkdaabodbbfhejigokh).
 
-#### Develop It
+### Develop It
 
 To develop the popup, background, and workspace pages:
 
