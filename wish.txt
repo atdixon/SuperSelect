@@ -1,5 +1,5 @@
 -- github link
--- disable actual plugin on demo page
+-- detect mobile
 -- test released extension
     -- test ga
 -- DEPLOY!!!

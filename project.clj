@@ -1,4 +1,4 @@
-(defproject SuperSelect "0.1.0"
+(defproject SuperSelect "0.0.1"
   :description "SuperSelect. Select the Web."
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/clojurescript "1.9.293"]
