@@ -1,11 +1,4 @@
 -- oss w/ readme/writeup, license
--- ask hn; is this useful? etc.
--- critique hn.
-    - ucs: note taking, semantic blog extract, vocab/dictionary, pl learning, cocktails/recipes, ml training, flash cards, etc.
--- om/nexters
--- only after hn, do any extra mktg or what have you
--- dev doc, sandbox.html etc.
--- MOVE ON
 
 -- content script to use shadow dom; but first need to get react to play shadow games.
 -- chrome.commands https://developer.chrome.com/extensions/commands
