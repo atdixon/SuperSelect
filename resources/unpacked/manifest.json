@@ -25,6 +25,9 @@
         "http://*/*",
         "https://*/*"
       ],
+      "exclude_matches": [
+        "*://superselect.rocks/*"
+      ],
       "css": [
         "css/fa/css/font-awesome-ff-chrome-ext.css"
       ],
