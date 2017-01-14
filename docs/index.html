@@ -20,6 +20,8 @@ repository_url: https://github.com/atdixon/SuperSelect
 
     <link rel="shortcut icon" type="image/png" href="favicon.png">
 
+    <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/pflcicgpnhmpkgkdaabodbbfhejigokh">
+
     <title>SuperSelect : Demo Page</title>
 </head>
 
@@ -29,7 +31,7 @@ repository_url: https://github.com/atdixon/SuperSelect
 <div id="header_wrap" class="outer">
     <header class="inner">
         <!--<a id="forkme_banner" href="{{page.repository_url}}">View on GitHub <span-->
-                <!--class="fa fa-external-link"></span></a>-->
+        <!--class="fa fa-external-link"></span></a>-->
 
         <h1 id="project_title"><span class="supe">Supe</span>rSelect</h1>
         <h2 id="project_tagline">Select and save text from the web with speed.</h2>
@@ -46,6 +48,11 @@ repository_url: https://github.com/atdixon/SuperSelect
 <!-- MAIN CONTENT -->
 <div id="main_content_wrap" class="outer">
     <section id="main_content" class="inner">
+        <p>
+        <div style="text-align: center; margin-bottom: 25px;">
+            <span class="install-button" onclick="chrome.webstore.install()">Install SuperSelect Now</span>
+        </div>
+        </p>
         <p id="browser-warning" style="display: none; border: 1px solid red; background-color: pink; padding: 15px;">
             <b>WARNING</b> This demo only works when using the Chrome browser.
             Download Chrome <a href="https://www.google.com/chrome">here.</a>
@@ -75,7 +82,8 @@ repository_url: https://github.com/atdixon/SuperSelect
         <p>Once the Overlay is On selecting text is just a matter of clicking the start and end positions of the text
             you wish to select.</p>
 
-        <p>Go ahead and click the beginning and end of this sentence to select it. First make sure the Overlay is On!</p>
+        <p>Go ahead and click the beginning and end of this sentence to select it. First make sure the Overlay is
+            On!</p>
 
         <h3>The Buffer</h3>
         <p>As you make selections you'll see that they appear above the SuperSelect control. This area is called
@@ -96,12 +104,15 @@ repository_url: https://github.com/atdixon/SuperSelect
             Vocabulary flash card deck:</p>
 
         <dl style="padding: 10px; text-align: center; border: 1px solid pink; background-color: #f5f0e9;">
-            <h4 style="text-decoration: underline; margin-bottom: 10px;">Word of the Day</h4>
+            <dt style="text-decoration: underline; margin-bottom: 10px;">Word of the Day</dt>
             <dt>mondegreen</dt>
-            <dt style="font-style: normal; font-weight: normal;">noun; <span style="font-style: italic;">mon-di-green</span></dt>
+            <dt style="font-style: normal; font-weight: normal;">noun; <span
+                    style="font-style: italic;">mon-di-green</span></dt>
             <dd>a misinterpretation of a word or phrase that has been heard, especially a song lyric.</dd>
             <dt style="margin-top: 10px;">Example Sentence</dt>
-            <dd>"There's a bathroom on the right" is a mondegreen of Creedence Clearwater Revival's "There's a bad moon on the rise."</dd>
+            <dd>"There's a bathroom on the right" is a mondegreen of Creedence Clearwater Revival's "There's a bad moon
+                on the rise."
+            </dd>
         </dl>
 
         <p>Let's grab this word and all its related data using SuperSelect.</p>
@@ -113,7 +124,8 @@ repository_url: https://github.com/atdixon/SuperSelect
         <p>You should see your selections in the SuperSelect buffer. Normally at this point you would press "<b>S</b>"
             or click <span class="fa fa-save"></span> to save your selections but this is a demo, and Save
             does nothing.</p>
-        <p>The extension when installed, however, will persist all of your Saved selections to a backend spreadsheet table
+        <p>The extension when installed, however, will persist all of your Saved selections to a backend spreadsheet
+            table
             called the <b>Workspace</b> where the data can be edited and exported out to any application or processor
             that you like.</p>
 
@@ -129,7 +141,9 @@ repository_url: https://github.com/atdixon/SuperSelect
             <tr>
                 <td>mondegreen</td>
                 <td>a misinterpretation of a word or phrase that has been heard, especially a song lyric.</td>
-                <td>"There's a bathroom on the right" is a mondegreen of Creedence Clearwater Revival's "There's a bad moon on the rise."</td>
+                <td>"There's a bathroom on the right" is a mondegreen of Creedence Clearwater Revival's "There's a bad
+                    moon on the rise."
+                </td>
                 <td>{{site.url}}{{page.url}}</td>
             </tr>
         </table>
@@ -140,20 +154,22 @@ repository_url: https://github.com/atdixon/SuperSelect
         <p>But the use cases for SuperSelect are endless &mdash;
             capturing data for flash cards, recipes, crafting machine learning training data sets from the web,
             extracting semantic data from blogs, etc. &mdash; anytime you want to quickly select a bunch of data
-        from the web.</p>
+            from the web.</p>
 
-        <p>Install SuperSelect.</p>
-
-        <p>INSTALL BLOCK</p>
+        <p>
+        <div style="text-align: center; margin-top: 45px;">
+            <span class="install-button" onclick="chrome.webstore.install()">Install SuperSelect Now</span>
+        </div>
+        </p>
     </section>
 </div>
 
 <!-- FOOTER  -->
 <!--<div id="footer_wrap" class="outer">-->
-    <!--<footer class="inner">-->
-        <!--<p class="copyright">Slate theme maintained by <a href="https://github.com/jasoncostello">Jason Costello</a></p>-->
-        <!--<p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>-->
-    <!--</footer>-->
+<!--<footer class="inner">-->
+<!--<p class="copyright">Slate theme maintained by <a href="https://github.com/jasoncostello">Jason Costello</a></p>-->
+<!--<p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>-->
+<!--</footer>-->
 <!--</div>-->
 <script>
     var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
@@ -165,10 +181,17 @@ repository_url: https://github.com/atdixon/SuperSelect
     }
 </script>
 <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function () {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date();
+        a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
     ga('create', 'UA-90139845-1', 'auto');
     ga('send', 'pageview');
@@ -185,6 +208,13 @@ repository_url: https://github.com/atdixon/SuperSelect
             });
         }
     };
+</script>
+<script>
+    /*
+     if (chrome.app.isInstalled) {
+     document.getElementById('install-button').style.display = 'none';
+     }
+     */
 </script>
 </body>
 </html>

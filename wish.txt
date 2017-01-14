@@ -1,5 +1,4 @@
 -- github link
--- https://developer.chrome.com/webstore/inline_installation
 -- detect mobile
 -- oss w/ readme/writeup, license
 -- ask hn; is this useful? etc.

@@ -228,6 +228,7 @@ Full-Width Styles
 }
 
 #forkme_banner {
+  cursor: pointer;
   display: block;
   position: absolute;
   top:0;
@@ -249,9 +250,9 @@ Full-Width Styles
   background-color: gray;
 }
 
-#forkme_banner:hover .fa {
-  color: darkorange;
-}
+/*#forkme_banner:hover .fa {*/
+  /*color: darkorange;*/
+/*}*/
 
 header {
   color: #f2f2f2;
@@ -302,7 +303,7 @@ header {
 
 #main_content.inner {
   background-color: #fff;
-  padding: 70px 100px;
+  padding: 20px 100px 70px 100px;
   /*box-shadow: 0 0 5px #ebebeb;*/
   /*-webkit-box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);*/
   /*-moz-box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);*/
@@ -386,4 +387,19 @@ Small Device Styles
 /*** Custom */
 .supe {
   background-color: red;
+}
+
+.install-button {
+  color: #494949;
+  padding: 10px;
+  cursor: pointer;
+  border: 2px solid #494949;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.install-button:hover {
+  color: white;
+  border: 2px solid #494949;
+  background-color: rgba(0, 0, 0, 0.6);
 }
