@@ -62,7 +62,7 @@
                         :style #js {:float "right"}}
             (when-not (empty? buffer)
               (dom/span #js {:className "zelector-action-link"
-                             :title "Save this buffer to the workspace"
+                             :title "Save this buffer to the workspace (Press \"S\")"
                              :onClick (fn [e]
                                         (flush-buffer-fn buffer)
                                         (clear-buffer!))}
