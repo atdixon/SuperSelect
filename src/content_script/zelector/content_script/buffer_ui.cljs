@@ -48,7 +48,7 @@
                   buffer)))))
         (dom/div #js {:id "zelector-action-bar" :className (if active "zelector-active" "zelector-inactive")}
           (dom/div #js {:id "zelector-action-bar-activator"
-                        :title (str/join " " [(if active "Deactivate" "Activate") "Overlay (Shift+Z)"])}
+                        :title (str/join " " [(if active "Deactivate" "Activate") "Overlay (Press \"Z\")"])}
             (dom/span #js {:onClick #(do
                                       (om/transact! this
                                         `[(durable/update {:z/active ~(not active)})])

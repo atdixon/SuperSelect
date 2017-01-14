@@ -1,5 +1,4 @@
--- oss w/ readme/writeup, license
-
+-- oss license
 -- content script to use shadow dom; but first need to get react to play shadow games.
 -- chrome.commands https://developer.chrome.com/extensions/commands
 
