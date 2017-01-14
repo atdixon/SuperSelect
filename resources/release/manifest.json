@@ -11,7 +11,7 @@
     }
   },
   "icons": {
-    "38": "images/z38.png",
+    "38": "images/z38-active.png",
     "128": "images/z128.png"
   },
   "content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self'",

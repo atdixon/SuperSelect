@@ -1,3 +1,4 @@
+-- github link
 -- disable actual plugin on demo page
 -- test released extension
     -- test ga
