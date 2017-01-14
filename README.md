@@ -1,10 +1,12 @@
-Use It
----
+#### Demo It
 
-Go to [http://superselect.rocks](http://superselect.rocks).
+Demo SuperSelect [here](http://superselect.rocks).
 
-Develop It
----
+#### Install It
+
+Install SuperSelect [here](https://chrome.google.com/webstore/detail/superselect/pflcicgpnhmpkgkdaabodbbfhejigokh).
+
+#### Develop It
 
 To develop the popup, background, and workspace pages:
 
