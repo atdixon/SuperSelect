@@ -160,7 +160,7 @@ repository_url: https://github.com/atdixon/SuperSelect
     var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
     var isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor);
     if (isChrome) {
-        document.write('<script src="js/compiled/demo.js">');
+        document.write('<script src="js/compiled/demo.js"><\/script>');
     } else {
         document.getElementById("browser-warning").style.display = 'block';
     }
@@ -173,6 +173,19 @@ repository_url: https://github.com/atdixon/SuperSelect
 
     ga('create', 'UA-90139845-1', 'auto');
     ga('send', 'pageview');
+</script>
+<script>
+    document.onkeypress = function (e) {
+        e = e || window.event;
+        if (e.keyCode == 122/*Z*/ || e.keyCode == 115/*S*/) {
+            ga('send', {
+                hitType: 'event',
+                eventCategory: 'Demo',
+                eventAction: 'Keypress',
+                eventLabel: ('Key:' + e.keyCode)
+            });
+        }
+    };
 </script>
 </body>
 </html>

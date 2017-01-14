@@ -1,6 +1,3 @@
--- demo page
-    -- only chrome support!
-    -- g/analytics
     -- disable actual plugin on demo page
 
 -- https://atdixon.github.io/SuperSelect/
