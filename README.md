@@ -6,9 +6,7 @@ Go to [http://superselect.rocks](http://superselect.rocks).
 Develop It
 ---
 
-First install [lein](https://leiningen.org/).
-
-Then, to develop the popup, background, and workspace pages:
+To develop the popup, background, and workspace pages:
 
     $ rlwrap lein fig-dev
 
