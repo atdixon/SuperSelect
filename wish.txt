@@ -1,8 +1,6 @@
 -- github link
+-- https://developer.chrome.com/webstore/inline_installation
 -- detect mobile
--- test released extension
-    -- test ga
--- DEPLOY!!!
 -- oss w/ readme/writeup, license
 -- ask hn; is this useful? etc.
 -- critique hn.
@@ -41,6 +39,7 @@ code
     -- org om components for minimal odm diffs/updates
 
 other
+-- fix dev-build profile
 -- O/n of traversals
 -- reconnect to bg page after extension refresh/update!
 -- save-buffer! and other buffer ops handled via remotes
