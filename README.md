@@ -1,4 +1,4 @@
-## <span style="color:red;">SUPE</span>RSELECT
+## SUPE/RSELECT
 
 SuperSelect is a Chrome extension that enables fast human selection of
 text and data from web pages.
