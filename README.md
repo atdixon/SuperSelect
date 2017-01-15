@@ -5,7 +5,7 @@ text and data from web pages.
 
 ### Demo It
 
-Demo SuperSelect [here](http://superselect.rocks).
+Demo SuperSelect [here](https://superselect.rocks).
 
 ### Install It
 
