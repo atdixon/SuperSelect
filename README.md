@@ -23,12 +23,14 @@ Then, launch a test browser:
 
     $ ./scripts/launch-test-browser.sh
 
+##### Sandbox Development
+
 To develop the content script capability headless (without
 the browser extension environment):
 
     $ rlwrap lein fig-demo
 
-Then serve resources/unpacked/sandbox.html in your browser.
+Then serve `resources/unpacked/sandbox.html` in your browser.
 
 This is useful for a better repl experience; figwheel isn't supported
 for the content script in the extension environment.
