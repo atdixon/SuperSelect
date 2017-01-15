@@ -1,3 +1,6 @@
+SuperSelect is a Chrome extension that enables fast human selection of
+text and data from web pages.
+
 ### Demo It
 
 Demo SuperSelect [here](http://superselect.rocks).
