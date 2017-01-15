@@ -229,6 +229,21 @@
     };
 </script>
 <script>
+    var installButtons = document.getElementsByClassName("install-button");
+
+    var onInstallClick = function() {
+        ga('send', {
+            hitType: 'event',
+            eventCategory: 'Demo',
+            eventAction: 'InstallClick'
+        });
+    };
+
+    for (var i = 0; i < installButtons.length; i++) {
+        installButtons[i].addEventListener('click', onInstallClick, false);
+    }
+</script>
+<script>
     /*
      if (chrome.app.isInstalled) {
      document.getElementById('install-button').style.display = 'none';
