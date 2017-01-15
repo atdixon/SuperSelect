@@ -76,7 +76,7 @@ h6 {
 }
 
 p {
-  font-family: "Roboto Slab",
+  font-family: "Roboto Slab", serif;
   font-size: 18px;
   margin: 0px 0 15px 0;
 }
@@ -186,7 +186,7 @@ hr {
   height: 1px;
   margin-bottom: 5px;
   border: none;
-  background: url('../images/bg_hr.png') repeat-x center;
+  /*background: url('../images/bg_hr.png') repeat-x center;*/
 }
 
 table {
@@ -381,10 +381,6 @@ Small Device Styles
     min-width: 320px;
     max-width: 480px;
     font-size: 11px;
-  }
-
-  img {
-    ma
   }
 }
 
