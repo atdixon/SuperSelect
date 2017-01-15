@@ -5,4 +5,4 @@
 
 ga('create', 'UA-90139845-1', 'auto');
 ga('set', 'checkProtocolTask', null);
-ga('send', 'pageview');
+ga('send', 'pageview', location.pathname);
