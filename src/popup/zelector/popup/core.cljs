@@ -64,9 +64,9 @@
         (dom/ul #js {}
           (if enabled
             (dom/li #js {:onClick #(om/transact! this '[(z/update {:z/enabled false :z/active false})])}
-              (dom/span #js {:className "text"} "Enabled") (dom/span #js {:className "fa fa-check"}))
+              (dom/span #js {:className "text"} "Controls Enabled") (dom/span #js {:className "fa fa-check"}))
             (dom/li #js {:onClick #(om/transact! this '[(z/update {:z/enabled true})])}
-              (dom/span #js {:className "text"} "Disabled")
+              (dom/span #js {:className "text"} "Controls Disabled")
               (dom/span #js {:className "fa fa-times"
                              :style #js {}})))
           (dom/li #js {:onClick #((open-workspace!) (close-popup!))}
