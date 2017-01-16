@@ -32,7 +32,7 @@ the browser extension environment):
 
     $ rlwrap lein fig-demo
 
-Then serve `resources/unpacked/sandbox.html` in your browser.
+Then serve `resources/unpacked/sandbox.html` to your browser.
 
 This is useful for a better repl experience; figwheel isn't supported
 for the content script in the extension environment.
