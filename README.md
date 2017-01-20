@@ -16,7 +16,7 @@ Install SuperSelect [here](https://chrome.google.com/webstore/detail/superselect
 
 ### Develop It
 
-SuperSelect is implemented in ClojureScript using frameworks [Om/Next](https://github.com/omcljs/om) and [chromex](https://github.com/binaryage/chromex).
+SuperSelect is implemented in ClojureScript using frameworks [om/next](https://github.com/omcljs/om) and [chromex](https://github.com/binaryage/chromex).
 
 To develop the popup, background, and workspace pages:
 
