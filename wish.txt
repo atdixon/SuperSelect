@@ -2,6 +2,7 @@
 -- oss license
 -- content script to use shadow dom; but first need to get react to play shadow games.
 -- chrome.commands https://developer.chrome.com/extensions/commands
+-- https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Porting_a_Google_Chrome_extension
 
 future
 -- direct integration with google sheets
