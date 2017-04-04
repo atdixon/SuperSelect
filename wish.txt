@@ -5,6 +5,7 @@
 -- https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Porting_a_Google_Chrome_extension
 
 future
+-- https://nadbm.github.io/react-datasheet/
 -- direct integration with google sheets
 -- easy mark clear (shift+click on mark?)
 -- on upgrade, updating indexeddb schemas v dexie??
