@@ -61,10 +61,6 @@
   ISeqable
   (-seq [node-list] (array-seq node-list)))
 
-(extend-type js/ClientRectList
-  ISeqable
-  (-seq [rect-list] (array-seq rect-list)))
-
 (defn node-type [node]
   (.-nodeType node))
 

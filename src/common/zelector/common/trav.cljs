@@ -33,7 +33,7 @@
   (-> range range->js .toString))
 
 (defn range->client-rects [range]
-  (-> range range->js .getClientRects))
+  (-> range range->js .getClientRects array-seq))
 
 (defn range->parent-node
   "Answers parent node of start container's parent."
