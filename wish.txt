@@ -1,3 +1,5 @@
+-- copy icon to copy content from one buffer row
+
 -- remove row, update badge...
 -- oss license
 -- content script to use shadow dom; but first need to get react to play shadow games.
